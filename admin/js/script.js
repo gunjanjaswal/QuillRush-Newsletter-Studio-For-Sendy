@@ -4,9 +4,9 @@ jQuery(document).ready(function ($) {
     let layoutType = 'custom';
 
     // Render Sendy lists fetched automatically by the server.
-    const knownLists = pvnss_ajax.known_lists || [];
-    const rememberedLists = (pvnss_ajax.remembered_lists || []).map(String);
-    const $listInput = $('#pvnss-list-id');
+    const knownLists = qrnss_ajax.known_lists || [];
+    const rememberedLists = (qrnss_ajax.remembered_lists || []).map(String);
+    const $listInput = $('#qrnss-list-id');
 
     const escapeHtml = (str) => String(str).replace(/[&<>"']/g, (c) => ({
         '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
@@ -18,7 +18,7 @@ jQuery(document).ready(function ($) {
     };
 
     if (knownLists.length > 0) {
-        let listHtml = '<div class="pvnss-list-checkboxes" style="max-height: 200px; overflow-y: auto; border: 1px solid #ddd; padding: 10px; border-radius: 4px; background: #fff; margin-top:5px;">';
+        let listHtml = '<div class="qrnss-list-checkboxes" style="max-height: 200px; overflow-y: auto; border: 1px solid #ddd; padding: 10px; border-radius: 4px; background: #fff; margin-top:5px;">';
         knownLists.forEach(list => {
             const isChecked = rememberedLists.indexOf(String(list.id)) !== -1;
             const countLabel = (list.count !== null && list.count !== undefined)
@@ -26,18 +26,18 @@ jQuery(document).ready(function ($) {
                 : '';
             listHtml += `
                 <label style="display:block; margin-bottom: 5px;">
-                    <input type="checkbox" name="pvnss_target_lists" value="${escapeHtml(list.id)}"${isChecked ? ' checked' : ''}> ${escapeHtml(list.name)}${countLabel}
+                    <input type="checkbox" name="qrnss_target_lists" value="${escapeHtml(list.id)}"${isChecked ? ' checked' : ''}> ${escapeHtml(list.name)}${countLabel}
                 </label>
             `;
         });
         listHtml += '</div>';
         $listInput.after(listHtml);
     } else {
-        $('#pvnss-list-empty-notice').show();
+        $('#qrnss-list-empty-notice').show();
     }
 
     // Banner Image Upload
-    $('#pvnss-upload-banner').on('click', function (e) {
+    $('#qrnss-upload-banner').on('click', function (e) {
         e.preventDefault();
         const image_frame = wp.media({
             title: 'Select Banner Image',
@@ -49,32 +49,32 @@ jQuery(document).ready(function ($) {
         image_frame.on('select', function () {
             const uploaded_image = image_frame.state().get('selection').first().toJSON();
             bannerUrl = uploaded_image.url;
-            $('#pvnss-banner-url').val(bannerUrl);
-            $('#pvnss-banner-preview').html(`<img src="${bannerUrl}" style="max-width:100%; height:auto;">`);
-            $('#pvnss-remove-banner').show();
-            $('#pvnss-upload-banner').text('Change Banner');
+            $('#qrnss-banner-url').val(bannerUrl);
+            $('#qrnss-banner-preview').html(`<img src="${bannerUrl}" style="max-width:100%; height:auto;">`);
+            $('#qrnss-remove-banner').show();
+            $('#qrnss-upload-banner').text('Change Banner');
             updatePreview();
         });
 
         image_frame.open();
     });
 
-    $('#pvnss-remove-banner').on('click', function (e) {
+    $('#qrnss-remove-banner').on('click', function (e) {
         e.preventDefault();
         bannerUrl = '';
-        $('#pvnss-banner-url').val('');
-        $('#pvnss-banner-preview').empty();
+        $('#qrnss-banner-url').val('');
+        $('#qrnss-banner-preview').empty();
         $(this).hide();
-        $('#pvnss-upload-banner').text('Select Banner');
+        $('#qrnss-upload-banner').text('Select Banner');
         updatePreview();
     });
 
     // Layout / Format Change
-    $('input[name="pvnss_layout"]').on('change', function () {
+    $('input[name="qrnss_layout"]').on('change', function () {
         layoutType = $(this).val();
         updatePreview();
     });
-    $('#pvnss-format').on('change', function () {
+    $('#qrnss-format').on('change', function () {
         layoutType = $(this).val();
         updatePreview();
     });
@@ -85,7 +85,7 @@ jQuery(document).ready(function ($) {
     let hasMorePosts = true;
     let isLoadingPosts = false;
 
-    $('#pvnss-search').on('input', function () {
+    $('#qrnss-search').on('input', function () {
         const query = $(this).val();
         // Allow empty query to reset to recent posts, otherwise wait for 3 chars
         if (query.length > 0 && query.length < 3) return;
@@ -97,7 +97,7 @@ jQuery(document).ready(function ($) {
 
     // Infinite scroll inside the results container.
     // Scroll events don't bubble, so bind directly (not via delegation).
-    $('#pvnss-post-results').on('scroll', function () {
+    $('#qrnss-post-results').on('scroll', function () {
         if (isLoadingPosts || !hasMorePosts) return;
         const el = this;
         if (el.scrollTop + el.clientHeight >= el.scrollHeight - 80) {
@@ -106,7 +106,7 @@ jQuery(document).ready(function ($) {
     });
 
     // Add Post to selection
-    $(document).on('click', '.pvnss-add-post', function (e) {
+    $(document).on('click', '.qrnss-add-post', function (e) {
         e.preventDefault();
         const postId = $(this).data('id');
         const title = $(this).data('title');
@@ -122,13 +122,13 @@ jQuery(document).ready(function ($) {
         updatePreview();
 
         // Change clicked button to "Remove"
-        $(this).removeClass('pvnss-add-post button-small')
-            .addClass('pvnss-remove-post-from-search button-link-delete')
+        $(this).removeClass('qrnss-add-post button-small')
+            .addClass('qrnss-remove-post-from-search button-link-delete')
             .text('Remove');
     });
 
     // Remove Post
-    $(document).on('click', '.pvnss-remove-post', function (e) {
+    $(document).on('click', '.qrnss-remove-post', function (e) {
         e.preventDefault();
         const postId = $(this).data('id');
         const index = selectedPosts.findIndex(p => p.id === postId);
@@ -139,7 +139,7 @@ jQuery(document).ready(function ($) {
 
             // Re-render search list to update button state if the item is visible there
             // Or simpler: find the button in search results and reset it
-            const $searchBtn = $(`.pvnss-remove-post-from-search[data-id="${postId}"]`);
+            const $searchBtn = $(`.qrnss-remove-post-from-search[data-id="${postId}"]`);
             if ($searchBtn.length) {
                 const post = $searchBtn.data('post-obj');
                 // We need to restore the "Add" button. 
@@ -147,15 +147,15 @@ jQuery(document).ready(function ($) {
                 // we can just reload the search or manually swap classes/text if we kept the data.
                 // A simpler way: just trigger a re-render of the current search results if we have them?
                 // Let's just swap the button appearance.
-                $searchBtn.removeClass('pvnss-remove-post-from-search button-link-delete')
-                    .addClass('pvnss-add-post button-small')
+                $searchBtn.removeClass('qrnss-remove-post-from-search button-link-delete')
+                    .addClass('qrnss-add-post button-small')
                     .text('Add');
             }
         }
     });
 
     // Remove Post via Search Result Button (New Handler)
-    $(document).on('click', '.pvnss-remove-post-from-search', function (e) {
+    $(document).on('click', '.qrnss-remove-post-from-search', function (e) {
         e.preventDefault();
         const postId = $(this).data('id');
         const index = selectedPosts.findIndex(p => p.id === postId);
@@ -165,32 +165,32 @@ jQuery(document).ready(function ($) {
             updatePreview();
 
             // Swap this button back to Add
-            $(this).removeClass('pvnss-remove-post-from-search button-link-delete')
-                .addClass('pvnss-add-post button-small')
+            $(this).removeClass('qrnss-remove-post-from-search button-link-delete')
+                .addClass('qrnss-add-post button-small')
                 .text('Add');
         }
     });
 
     // Toggle Schedule Options
-    $('input[name="pvnss_send_type"]').on('change', function () {
+    $('input[name="qrnss_send_type"]').on('change', function () {
         if ($(this).val() === 'schedule') {
-            $('#pvnss-schedule-options').slideDown();
+            $('#qrnss-schedule-options').slideDown();
         } else {
-            $('#pvnss-schedule-options').slideUp();
+            $('#qrnss-schedule-options').slideUp();
         }
     });
 
     // Update datetime when time selectors change
-    $('#pvnss-schedule-hour, #pvnss-schedule-minute').on('change', function () {
+    $('#qrnss-schedule-hour, #qrnss-schedule-minute').on('change', function () {
         updateScheduledDateTime();
     });
 
     // Function to combine date and time into hidden input
     function updateScheduledDateTime() {
-        const selectedDate = $('#pvnss-datepicker-inline').datepicker('getDate');
+        const selectedDate = $('#qrnss-datepicker-inline').datepicker('getDate');
         if (selectedDate) {
-            const hour = $('#pvnss-schedule-hour').val();
-            const minute = $('#pvnss-schedule-minute').val();
+            const hour = $('#qrnss-schedule-hour').val();
+            const minute = $('#qrnss-schedule-minute').val();
 
             // Format: YYYY-MM-DD HH:MM:SS
             const year = selectedDate.getFullYear();
@@ -198,31 +198,31 @@ jQuery(document).ready(function ($) {
             const day = String(selectedDate.getDate()).padStart(2, '0');
 
             const datetime = `${year}-${month}-${day} ${hour}:${minute}:00`;
-            $('#pvnss-schedule-datetime').val(datetime);
+            $('#qrnss-schedule-datetime').val(datetime);
         }
     }
 
 
     // Create Campaign
-    $('#pvnss-create-campaign').on('click', function (e) {
+    $('#qrnss-create-campaign').on('click', function (e) {
         e.preventDefault();
         const $btn = $(this);
         $btn.prop('disabled', true).text('Processing...');
 
         const campaignData = {
-            subject: $('#pvnss-subject').val(),
-            from_name: $('#pvnss-from-name').val(),
-            from_email: $('#pvnss-from-email').val(),
-            html_text: $('#pvnss-preview-content').html(),
+            subject: $('#qrnss-subject').val(),
+            from_name: $('#qrnss-from-name').val(),
+            from_email: $('#qrnss-from-email').val(),
+            html_text: $('#qrnss-preview-content').html(),
             list_id: (function () {
-                const $selectedLists = $('input[name="pvnss_target_lists"]:checked');
+                const $selectedLists = $('input[name="qrnss_target_lists"]:checked');
                 if ($selectedLists.length > 0) {
                     const ids = [];
                     $selectedLists.each(function () { ids.push($(this).val()); });
                     return ids.join(',');
                 }
                 // Fallback: parse pipe-separated format (List Name|List ID)
-                const rawValue = $('#pvnss-list-id').val();
+                const rawValue = $('#qrnss-list-id').val();
                 if (rawValue && rawValue.includes('|')) {
                     const ids = rawValue.split('\n')
                         .map(line => line.trim())
@@ -233,8 +233,8 @@ jQuery(document).ready(function ($) {
                 }
                 return rawValue;
             })(),
-            send_type: $('input[name="pvnss_send_type"]:checked').val(),
-            schedule_date: $('#pvnss-schedule-datetime').val()
+            send_type: $('input[name="qrnss_send_type"]:checked').val(),
+            schedule_date: $('#qrnss-schedule-datetime').val()
         };
 
         campaignData.plain_text = $(campaignData.html_text).text();
@@ -247,11 +247,11 @@ jQuery(document).ready(function ($) {
         }
 
         $.ajax({
-            url: pvnss_ajax.ajax_url,
+            url: qrnss_ajax.ajax_url,
             type: 'POST',
             data: {
-                action: 'pvnss_create_campaign',
-                nonce: pvnss_ajax.nonce,
+                action: 'qrnss_create_campaign',
+                nonce: qrnss_ajax.nonce,
                 campaign: campaignData
             },
             success: function (response) {
@@ -275,15 +275,15 @@ jQuery(document).ready(function ($) {
     function postItemHtml(post) {
         const isSelected = selectedPosts.some(p => p.id === post.id);
         const btnHtml = isSelected
-            ? `<button class="button button-link-delete pvnss-remove-post-from-search" data-id="${post.id}">Remove</button>`
-            : `<button class="button button-small pvnss-add-post"
+            ? `<button class="button button-link-delete qrnss-remove-post-from-search" data-id="${post.id}">Remove</button>`
+            : `<button class="button button-small qrnss-add-post"
                                 data-id="${post.id}"
                                 data-title="${post.title}"
                                 data-thumbnail="${post.thumbnail}"
                                 data-excerpt="${post.excerpt}"
                                 data-link="${post.link}">Add</button>`;
         return `
-            <div class="pvnss-post-item" style="display:flex; align-items:center; margin-bottom:10px; border-bottom:1px solid #eee; padding-bottom:10px;">
+            <div class="qrnss-post-item" style="display:flex; align-items:center; margin-bottom:10px; border-bottom:1px solid #eee; padding-bottom:10px;">
                 <img src="${post.thumbnail}" alt="" style="width:50px; height:50px; object-fit:cover; margin-right:10px; border-radius:4px;">
                 <div style="flex-grow:1;">
                     <strong>${post.title}</strong>
@@ -295,7 +295,7 @@ jQuery(document).ready(function ($) {
     function appendPostList(posts) {
         if (!posts || posts.length === 0) return;
         const html = posts.map(postItemHtml).join('');
-        $('#pvnss-post-results').append(html);
+        $('#qrnss-post-results').append(html);
     }
 
     function renderPostList(posts) {
@@ -308,9 +308,9 @@ jQuery(document).ready(function ($) {
                 let btnHtml = '';
 
                 if (isSelected) {
-                    btnHtml = `<button class="button button-link-delete pvnss-remove-post-from-search" data-id="${post.id}">Remove</button>`;
+                    btnHtml = `<button class="button button-link-delete qrnss-remove-post-from-search" data-id="${post.id}">Remove</button>`;
                 } else {
-                    btnHtml = `<button class="button button-small pvnss-add-post"
+                    btnHtml = `<button class="button button-small qrnss-add-post"
                                 data-id="${post.id}"
                                 data-title="${post.title}"
                                 data-thumbnail="${post.thumbnail}"
@@ -319,7 +319,7 @@ jQuery(document).ready(function ($) {
                 }
 
                 html += `
-                    <div class="pvnss-post-item" style="display:flex; align-items:center; margin-bottom:10px; border-bottom:1px solid #eee; padding-bottom:10px;">
+                    <div class="qrnss-post-item" style="display:flex; align-items:center; margin-bottom:10px; border-bottom:1px solid #eee; padding-bottom:10px;">
                         <img src="${post.thumbnail}" alt="" style="width:50px; height:50px; object-fit:cover; margin-right:10px; border-radius:4px;">
                         <div style="flex-grow:1;">
                             <strong>${post.title}</strong>
@@ -329,25 +329,25 @@ jQuery(document).ready(function ($) {
                 `;
             });
         }
-        $('#pvnss-post-results').html(html);
+        $('#qrnss-post-results').html(html);
     }
 
     function renderSelectedPosts() {
         let html = '';
         selectedPosts.forEach(post => {
             html += `
-                <div class="pvnss-selected-item" style="display:flex; justify-content:space-between; align-items:center; padding:8px; background:#f0f0f1; margin-bottom:5px; border-radius:4px;">
+                <div class="qrnss-selected-item" style="display:flex; justify-content:space-between; align-items:center; padding:8px; background:#f0f0f1; margin-bottom:5px; border-radius:4px;">
                     <span style="font-weight:500;">${post.title}</span>
-                    <a href="#" class="pvnss-remove-post" data-id="${post.id}" style="color:#d63638; text-decoration:none; font-size:13px;">Remove</a>
+                    <a href="#" class="qrnss-remove-post" data-id="${post.id}" style="color:#d63638; text-decoration:none; font-size:13px;">Remove</a>
                 </div>
             `;
         });
-        $('#pvnss-selected-list').html(html);
+        $('#qrnss-selected-list').html(html);
     }
 
     function updatePreview() {
         let html = '';
-        const settings = pvnss_ajax.settings || {};
+        const settings = qrnss_ajax.settings || {};
 
         // 1. Template Wrapper & Styles
         html += `
@@ -371,7 +371,7 @@ jQuery(document).ready(function ($) {
                     padding-right: 0 !important;
                     padding-bottom: 20px !important;
                 }
-                .pvnss-card-table {
+                .qrnss-card-table {
                     height: auto !important;
                 }
             }
@@ -388,7 +388,7 @@ jQuery(document).ready(function ($) {
         if (layoutType === 'editorial') {
             html += renderEditorialBody(currentBanner, settings);
             html += renderFooter(settings, 'editorial');
-            $('#pvnss-preview-content').html(html);
+            $('#qrnss-preview-content').html(html);
             return;
         }
 
@@ -456,7 +456,7 @@ jQuery(document).ready(function ($) {
         }
 
         html += renderFooter(settings, 'custom');
-        $('#pvnss-preview-content').html(html);
+        $('#qrnss-preview-content').html(html);
     }
 
     function renderFooter(settings, format) {
@@ -492,7 +492,7 @@ jQuery(document).ready(function ($) {
 
         html += `
         <div style="background-color: #0f172a; padding: 32px 20px 40px; text-align: center; color: #cbd5e1; border-top: 1px solid #1e293b;">
-            ${footerLogo ? `<a href="${pvnss_ajax.site_url}" style="text-decoration:none;"><img src="${footerLogo}" width="110" style="width: 110px; margin-bottom: 20px;" /></a>` : ''}
+            ${footerLogo ? `<a href="${qrnss_ajax.site_url}" style="text-decoration:none;"><img src="${footerLogo}" width="110" style="width: 110px; margin-bottom: 20px;" /></a>` : ''}
             <div style="margin-bottom: 20px;">
                 ${settings.social_instagram ? `<a href="${settings.social_instagram}" style="text-decoration:none; margin:0 8px;"><img src="https://cdn-icons-png.flaticon.com/512/2111/2111463.png" width="30" height="30" style="width:30px; height:30px; vertical-align:middle;" /></a>` : ''}
                 ${settings.social_linkedin ? `<a href="${settings.social_linkedin}" style="text-decoration:none; margin:0 8px;"><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/ca/LinkedIn_logo_initials.png/960px-LinkedIn_logo_initials.png" width="30" height="30" style="width:30px; height:30px; vertical-align:middle;" /></a>` : ''}
@@ -612,10 +612,10 @@ jQuery(document).ready(function ($) {
     }
 
     function renderGridItem(post) {
-        const settings = pvnss_ajax.settings || {};
+        const settings = qrnss_ajax.settings || {};
         return `
         <td class="responsive-td" style="padding:8px; vertical-align: top;" valign="top" width="50%">
-            <table class="pvnss-card-table" cellpadding="0" cellspacing="0" style="border:1px solid #e2e8f0; border-radius:12px; width: 100%; table-layout: fixed; background-color: #ffffff;">
+            <table class="qrnss-card-table" cellpadding="0" cellspacing="0" style="border:1px solid #e2e8f0; border-radius:12px; width: 100%; table-layout: fixed; background-color: #ffffff;">
                 <tbody>
                     <tr>
                         <td align="center" valign="middle" style="height: 180px; overflow: hidden; vertical-align: middle; padding: 0; background-color: #f1f5f9; border-top-left-radius:12px; border-top-right-radius:12px;">
@@ -656,22 +656,22 @@ jQuery(document).ready(function ($) {
         isLoadingPosts = true;
 
         if (!append) {
-            $('#pvnss-post-results').html('<p style="padding:10px; color:#64748b;">Loading…</p>');
+            $('#qrnss-post-results').html('<p style="padding:10px; color:#64748b;">Loading…</p>');
         } else {
-            $('#pvnss-post-results').append('<p class="pvnss-loading-more" style="padding:10px; text-align:center; color:#64748b;">Loading more…</p>');
+            $('#qrnss-post-results').append('<p class="qrnss-loading-more" style="padding:10px; text-align:center; color:#64748b;">Loading more…</p>');
         }
 
         $.ajax({
-            url: pvnss_ajax.ajax_url,
+            url: qrnss_ajax.ajax_url,
             type: 'POST',
             data: {
-                action: 'pvnss_search_posts',
-                nonce: pvnss_ajax.nonce,
+                action: 'qrnss_search_posts',
+                nonce: qrnss_ajax.nonce,
                 query: query,
                 page: page
             },
             success: function (response) {
-                $('.pvnss-loading-more').remove();
+                $('.qrnss-loading-more').remove();
                 if (response.success) {
                     const payload = response.data || {};
                     const posts = payload.posts || [];
@@ -683,7 +683,7 @@ jQuery(document).ready(function ($) {
                         renderPostList(posts);
                     }
                     if (!hasMorePosts && append) {
-                        $('#pvnss-post-results').append('<p style="padding:10px; text-align:center; color:#94a3b8; font-size:12px;">No more posts</p>');
+                        $('#qrnss-post-results').append('<p style="padding:10px; text-align:center; color:#94a3b8; font-size:12px;">No more posts</p>');
                     }
                 }
             },

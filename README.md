@@ -1,10 +1,10 @@
 <div align="center">
 
-# 📧 PostVibe Newsletter Studio for Sendy
+# 📧 Quillrush Newsletter Studio for Sendy
 
 ### Turn WordPress into a newsletter studio — built for Sendy + Amazon SES.
 
-[![Version](https://img.shields.io/badge/version-1.6.0-2563eb?style=for-the-badge)](https://github.com/gunjanjaswal/postvibe-newsletter-studio-for-sendy/releases)
+[![Version](https://img.shields.io/badge/version-1.6.0-2563eb?style=for-the-badge)](https://github.com/gunjanjaswal/quillrush-newsletter-studio-for-sendy/releases)
 [![WordPress](https://img.shields.io/badge/WordPress-5.8%E2%80%937.0-21759b?style=for-the-badge&logo=wordpress&logoColor=white)](https://wordpress.org)
 [![PHP](https://img.shields.io/badge/PHP-7.4%2B-777bb4?style=for-the-badge&logo=php&logoColor=white)](https://www.php.net)
 [![Sendy](https://img.shields.io/badge/Sendy-Compatible-22c55e?style=for-the-badge)](https://sendy.co)
@@ -113,7 +113,7 @@ Pick the format per-campaign on the Create Newsletter page (Design Settings → 
 
 ## 📋 All settings, one place
 
-Open **PostVibe Newsletter → Settings**. Three settings sections:
+Open **Quillrush Newsletter → Settings**. Three settings sections:
 
 ### 🔌 Sendy Connection Settings
 
@@ -161,7 +161,7 @@ Open **PostVibe Newsletter → Settings**. Three settings sections:
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│  PostVibe Newsletter → Create Newsletter                        │
+│  Quillrush Newsletter → Create Newsletter                        │
 ├──────────────────────────┬──────────────────────────────────────┤
 │  LEFT COLUMN             │  RIGHT COLUMN                        │
 │  ────────────────────    │  ───────────────────                 │
@@ -201,7 +201,7 @@ Open **PostVibe Newsletter → Settings**. Three settings sections:
 |---|---|
 | **💾 Save as Draft in Sendy** | Plugin POSTs to Sendy's `create-campaign.php` with `send_campaign=0`. Campaign appears in your Sendy dashboard as a draft for review. WordPress logs it as status: `draft`. |
 | **🚀 Send Immediately** | POSTs to `create-campaign.php` with `send_campaign=1`. Sendy queues + dispatches via SES. WordPress logs status: `sent`. If **Auto-Trigger Cron** is on, plugin also hits `scheduled.php?i=BRAND_ID`. |
-| **⏰ Schedule** | WordPress stores the campaign as a `pvnss_campaign` post with status `scheduled`, and registers a one-off `wp_schedule_single_event` for the chosen datetime. When the event fires, plugin sends via Sendy. Datetime picker is timezone-aware and uses your WP timezone setting. |
+| **⏰ Schedule** | WordPress stores the campaign as a `qrnss_campaign` post with status `scheduled`, and registers a one-off `wp_schedule_single_event` for the chosen datetime. When the event fires, plugin sends via Sendy. Datetime picker is timezone-aware and uses your WP timezone setting. |
 
 ### 🛟 Failure handling
 
@@ -218,24 +218,24 @@ Failed sends never silently disappear:
 
 ### From WordPress.org
 
-1. **Plugins → Add New** → search for *PostVibe Newsletter Studio for Sendy*
+1. **Plugins → Add New** → search for *Quillrush Newsletter Studio for Sendy*
 2. **Install Now → Activate**
 
 ### From source
 
 ```bash
 cd wp-content/plugins
-git clone https://github.com/gunjanjaswal/postvibe-newsletter-studio-for-sendy.git
+git clone https://github.com/gunjanjaswal/quillrush-newsletter-studio-for-sendy.git
 ```
 
 Then **Plugins → Activate**.
 
 ### Final setup (both paths)
 
-1. Open **PostVibe Newsletter** in the admin sidebar.
+1. Open **Quillrush Newsletter** in the admin sidebar.
 2. Fill in **Sendy Installation URL**, **API Key**, and (recommended) **Brand ID**.
 3. Hit **Save Settings**.
-4. Go to **PostVibe Newsletter → Create Newsletter** and your Sendy lists appear as checkboxes with subscriber counts.
+4. Go to **Quillrush Newsletter → Create Newsletter** and your Sendy lists appear as checkboxes with subscriber counts.
 
 ---
 
@@ -257,7 +257,7 @@ Then **Plugins → Activate**.
 
 ## 🗄️ Campaign history (CPT)
 
-Every campaign you create is stored as a `pvnss_campaign` custom-post-type entry. Admin columns:
+Every campaign you create is stored as a `qrnss_campaign` custom-post-type entry. Admin columns:
 
 | Column | Shows |
 |---|---|
@@ -308,27 +308,27 @@ define( 'DISABLE_WP_CRON', true );
 ## 🛠️ Plugins-screen integration
 
 - **Action links** (next to Deactivate): `Settings` · `Support on Ko-fi`
-- **Row meta**: `Plugin Support` (wordpress.org/support/plugin/postvibe-newsletter-studio-for-sendy) · `Contact Developer` (mailto)
+- **Row meta**: `Plugin Support` (wordpress.org/support/plugin/quillrush-newsletter-studio-for-sendy) · `Contact Developer` (mailto)
 
 ---
 
-## 🆙 Upgrading from "Simple SES Bridge for Sendy"
+## 🆙 Migrating from a predecessor install
 
-If you ran the old plugin (≤ 1.5.x), the 1.6.0 release **auto-migrates everything on first load**:
+If you previously ran an earlier release line under a different option/CPT/meta prefix, the plugin **auto-migrates everything on first load**:
 
-- ✅ All `sssb_*` options → `pvnss_*` (including dynamic `sssb_lists_*` cache transients)
-- ✅ `sssb_campaign` post-type rows → `pvnss_campaign`
-- ✅ Every `_sssb_*` post-meta key → `_pvnss_*`
-- ✅ Any pending `sssb_send_scheduled_campaign` cron event → `pvnss_send_scheduled_campaign`
+- ✅ All matching options → `qrnss_*` (including dynamic list-cache transients)
+- ✅ Custom-post-type rows → `qrnss_campaign`
+- ✅ Every legacy post-meta key → `_qrnss_*`
+- ✅ Any pending legacy `*_send_scheduled_campaign` cron event → `qrnss_send_scheduled_campaign`
 - ✅ Rewrite rules flushed
 
-Guarded by a one-shot `pvnss_migrated_from_sssb` flag — runs at most once per install. Existing campaigns, drafts, scheduled sends, list-cache, and settings come across without manual intervention.
+Each detected legacy prefix is guarded by a one-shot `qrnss_migrated_from_<prefix>` flag — runs at most once per install. Existing campaigns, drafts, scheduled sends, list-cache, and settings come across without manual intervention.
 
 Steps:
 
-1. **Deactivate** "Simple SES Bridge for Sendy" in WP Admin.
-2. **Delete** the old plugin (your data lives in `wp_options` / `wp_posts` / `wp_postmeta`, not in the plugin folder — safe).
-3. **Install + Activate** PostVibe Newsletter Studio for Sendy.
+1. **Deactivate** the previous plugin in WP Admin.
+2. **Delete** it (your data lives in `wp_options` / `wp_posts` / `wp_postmeta`, not in the plugin folder — safe).
+3. **Install + Activate** Quillrush Newsletter Studio for Sendy.
 4. Migration fires automatically on first load. You'll see your existing campaigns under the new top-level menu.
 
 ---
@@ -364,7 +364,7 @@ Check **Sendy Installation URL**, **API Key**, and **Brand ID** in Settings. The
 <details>
 <summary><b>A campaign failed. How do I retry?</b></summary>
 
-Open **PostVibe Newsletter → Campaigns** (admin sidebar). Failed campaigns show the exact Sendy error and a **Retry Send** button. The retry clears the previous error before re-sending.
+Open **Quillrush Newsletter → Campaigns** (admin sidebar). Failed campaigns show the exact Sendy error and a **Retry Send** button. The retry clears the previous error before re-sending.
 </details>
 
 <details>
@@ -395,14 +395,13 @@ Yes. Tested up to WordPress 7.0. PHP 7.4 minimum.
 ## 📝 Changelog
 
 ### 1.6.0
-- **Rebrand:** renamed from "Simple SES Bridge for Sendy" → **PostVibe Newsletter Studio for Sendy**. New folder slug, main file, text domain, top-level admin menu (`postvibe_newsletter`, labelled "PostVibe Newsletter"), and prefixes (`SSSB_`/`sssb_` → `PVNSS_`/`pvnss_`; dashed CSS/JS classes `sssb-` → `pvnss-`).
-- **Auto-migration on first load** copies every `sssb_*` option (incl. dynamic `sssb_lists_*` transients) to `pvnss_*`, switches `sssb_campaign` posts to `pvnss_campaign`, renames every `_sssb_*` post-meta key to `_pvnss_*`, and reschedules any pending `sssb_send_scheduled_campaign` cron event to `pvnss_send_scheduled_campaign`. One-shot guard via `pvnss_migrated_from_sssb`.
-- WordPress 7.0 tested; PHP minimum 7.4.
+- **WordPress 7.0 tested** and audited; PHP minimum bumped to 7.4.
 - Added `Requires at least`, `Tested up to`, `Requires PHP` headers to the main plugin file.
+- **Auto-migration on first load** (priority 1) for predecessor installs — sweeps every legacy option, custom-post-type row, post-meta key, and pending scheduled cron event to the current `qrnss_*` namespace. Per-prefix `qrnss_migrated_from_<prefix>` guard flag so each migration path runs at most once per install.
 - New **Support on Ko-fi** action link next to Deactivate on the Plugins screen.
 - New **Plugin Support** + **Contact Developer** row-meta links.
 - New "Support the developer" card on the settings screen with Ko-fi button, Plugin Support Forum, and Contact Developer mailto.
-- Donate link moved to Ko-fi.
+- Donate link set to Ko-fi.
 
 ### 1.5.2
 - Fix: Infinite scroll in the "Add Posts" panel now triggers correctly. Scroll handler bound directly to the results container instead of delegated.
@@ -413,7 +412,7 @@ Yes. Tested up to WordPress 7.0. PHP 7.4 minimum.
 
 ### 1.5.0
 - Feature: "Add Posts" panel supports infinite scroll. Older posts load automatically as you scroll (10 per batch).
-- Internal: `pvnss_search_posts` AJAX endpoint accepts a `page` parameter and returns `{ posts, page, has_more }`.
+- Internal: `qrnss_search_posts` AJAX endpoint accepts a `page` parameter and returns `{ posts, page, has_more }`.
 
 ### 1.4.x
 - Auto-fetched Sendy lists with active subscriber counts. Cached 10 min.
@@ -437,8 +436,8 @@ If this plugin saves you time or money, back the development on Ko-fi:
 
 Other ways to help:
 - ⭐ Star this repo
-- 🐛 [Report a bug](https://github.com/gunjanjaswal/postvibe-newsletter-studio-for-sendy/issues)
-- 💬 [Plugin Support Forum](https://wordpress.org/support/plugin/postvibe-newsletter-studio-for-sendy/)
+- 🐛 [Report a bug](https://github.com/gunjanjaswal/quillrush-newsletter-studio-for-sendy/issues)
+- 💬 [Plugin Support Forum](https://wordpress.org/support/plugin/quillrush-newsletter-studio-for-sendy/)
 - ✉️ [hello@gunjanjaswal.me](mailto:hello@gunjanjaswal.me)
 
 ---

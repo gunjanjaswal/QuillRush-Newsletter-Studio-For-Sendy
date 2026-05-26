@@ -7,7 +7,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-class PVNSS_Sendy_API
+class QRNSS_Sendy_API
 {
 
     private $installation_url;
@@ -18,7 +18,7 @@ class PVNSS_Sendy_API
 
     public function __construct()
     {
-        $options = get_option('pvnss_settings');
+        $options = get_option('qrnss_settings');
         $this->installation_url = isset($options['installation_url']) ? trailingslashit($options['installation_url']) : '';
         $this->api_key = isset($options['api_key']) ? $options['api_key'] : '';
         $this->list_id = isset($options['list_id']) ? $options['list_id'] : '';
@@ -35,7 +35,7 @@ class PVNSS_Sendy_API
     public function create_campaign($args)
     {
         if (empty($this->installation_url) || empty($this->api_key)) {
-            return new WP_Error('pvnss_missing_config', __('Sendy settings are incomplete.', 'postvibe-newsletter-studio-for-sendy'));
+            return new WP_Error('qrnss_missing_config', __('Sendy settings are incomplete.', 'quillrush-newsletter-studio-for-sendy'));
         }
 
         $defaults = array(
@@ -86,7 +86,7 @@ class PVNSS_Sendy_API
                 'message' => $response_body,
             );
         } else {
-            return new WP_Error('pvnss_sendy_error', $response_body);
+            return new WP_Error('qrnss_sendy_error', $response_body);
         }
     }
 
@@ -104,7 +104,7 @@ class PVNSS_Sendy_API
             return array();
         }
 
-        $cache_key = 'pvnss_lists_' . md5($this->installation_url . '|' . $this->brand_id);
+        $cache_key = 'qrnss_lists_' . md5($this->installation_url . '|' . $this->brand_id);
 
         if (!$force_refresh) {
             $cached = get_transient($cache_key);
@@ -228,7 +228,7 @@ class PVNSS_Sendy_API
         wp_remote_get($cron_url, array(
             'blocking' => false,
             'timeout' => 0.01,
-            'sslverify' => apply_filters('pvnss_cron_ssl_verify', false),
+            'sslverify' => apply_filters('qrnss_cron_ssl_verify', false),
         ));
     }
 }
