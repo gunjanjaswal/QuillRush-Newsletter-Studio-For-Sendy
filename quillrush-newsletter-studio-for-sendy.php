@@ -1,7 +1,7 @@
 <?php
 /**
  * Plugin Name: Quillrush Newsletter Studio for Sendy
- * Plugin URI:  https://github.com/gunjanjaswal/quillrush-newsletter-studio-for-sendy
+ * Plugin URI:  https://wordpress.org/plugins/quillrush-newsletter-studio-for-sendy/
  * Description: Connects WordPress to Sendy (via Amazon SES) to create and send newsletters from your content. Visual builder, scheduling, multi-list, and editorial newsletter formats.
  * Version:     1.6.0
  * Author:      Gunjan Jaswal
@@ -555,9 +555,33 @@ function qrnss_plugin_action_links($links)
 add_filter('plugin_row_meta', 'qrnss_plugin_row_meta', 10, 2);
 function qrnss_plugin_row_meta($links, $file)
 {
-    if (plugin_basename(__FILE__) === $file) {
-        $links[] = '<a href="https://wordpress.org/support/plugin/quillrush-newsletter-studio-for-sendy/" target="_blank">' . esc_html__('Plugin Support', 'quillrush-newsletter-studio-for-sendy') . '</a>';
-        $links[] = '<a href="mailto:hello@gunjanjaswal.me">' . esc_html__('Contact Developer', 'quillrush-newsletter-studio-for-sendy') . '</a>';
+    if (plugin_basename(__FILE__) !== $file) {
+        return $links;
     }
+
+    $plugin_slug = 'quillrush-newsletter-studio-for-sendy';
+
+    // Strip the auto-injected "Visit plugin site" link (points at the Plugin URI header).
+    $plugin_uri = 'https://wordpress.org/plugins/' . $plugin_slug . '/';
+    foreach ($links as $i => $link) {
+        if (false !== strpos($link, $plugin_uri)) {
+            unset($links[ $i ]);
+        }
+    }
+    $links = array_values($links);
+
+    // "View details" thickbox modal — mirrors wp.org-hosted plugins. Works once the slug is listed on wordpress.org.
+    $details_url = self_admin_url('plugin-install.php?tab=plugin-information&plugin=' . $plugin_slug . '&TB_iframe=true&width=600&height=550');
+    $links[]     = sprintf(
+        '<a href="%1$s" class="thickbox open-plugin-details-modal" aria-label="%2$s" data-title="%3$s">%4$s</a>',
+        esc_url($details_url),
+        esc_attr__('More information about Quillrush Newsletter Studio for Sendy', 'quillrush-newsletter-studio-for-sendy'),
+        esc_attr__('Quillrush Newsletter Studio for Sendy', 'quillrush-newsletter-studio-for-sendy'),
+        esc_html__('View details', 'quillrush-newsletter-studio-for-sendy')
+    );
+
+    $links[] = '<a href="https://wordpress.org/support/plugin/' . $plugin_slug . '/" target="_blank">' . esc_html__('Plugin Support', 'quillrush-newsletter-studio-for-sendy') . '</a>';
+    $links[] = '<a href="mailto:hello@gunjanjaswal.me">' . esc_html__('Contact Developer', 'quillrush-newsletter-studio-for-sendy') . '</a>';
+
     return $links;
 }

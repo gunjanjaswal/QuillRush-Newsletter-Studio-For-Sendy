@@ -4,10 +4,11 @@
 
 ### Turn WordPress into a newsletter studio — built for Sendy + Amazon SES.
 
-[![Version](https://img.shields.io/badge/version-1.6.0-2563eb?style=for-the-badge)](https://github.com/gunjanjaswal/quillrush-newsletter-studio-for-sendy/releases)
+[![Version](https://img.shields.io/badge/version-1.6.0-2563eb?style=for-the-badge)](https://wordpress.org/plugins/quillrush-newsletter-studio-for-sendy/)
 [![WordPress](https://img.shields.io/badge/WordPress-5.8%E2%80%937.0-21759b?style=for-the-badge&logo=wordpress&logoColor=white)](https://wordpress.org)
 [![PHP](https://img.shields.io/badge/PHP-7.4%2B-777bb4?style=for-the-badge&logo=php&logoColor=white)](https://www.php.net)
 [![Sendy](https://img.shields.io/badge/Sendy-Compatible-22c55e?style=for-the-badge)](https://sendy.co)
+[![Amazon SES](https://img.shields.io/badge/Amazon%20SES-Required-ff9900?style=for-the-badge&logo=amazonaws&logoColor=white)](https://aws.amazon.com/ses/)
 [![License](https://img.shields.io/badge/License-GPLv2-e74c3c?style=for-the-badge)](https://www.gnu.org/licenses/gpl-2.0.html)
 [![Support on Ko-fi](https://img.shields.io/badge/Ko--fi-Support-FF5E5B?style=for-the-badge&logo=ko-fi&logoColor=white)](https://ko-fi.com/gunjanjaswal)
 
@@ -17,9 +18,11 @@
 
 ## 🎯 What it does
 
-Drag-and-drop your latest WordPress posts into a beautiful, fully-responsive HTML email. Choose between two ready-made layouts, pick the Sendy lists/segments to ship to, hit **Send Immediately**, **Save as Draft**, or **Schedule** — and the plugin talks straight to your self-hosted Sendy install (which forwards through Amazon SES).
+WordPress front-end for the **Sendy + Amazon SES** newsletter stack. Drag-and-drop your latest WordPress posts into a beautiful, fully-responsive HTML email. Choose between two ready-made layouts, pick the Sendy lists/segments to ship to, hit **Send Immediately**, **Save as Draft**, or **Schedule** — and the plugin talks straight to your self-hosted Sendy install, which forwards every message through Amazon SES.
 
 No HTML coding. No external SaaS. No paid tier.
+
+> ⚠️ **Requires a self-hosted [Sendy](https://sendy.co) install backed by [Amazon SES](https://aws.amazon.com/ses/).** This plugin is the WordPress UI — it does not replace Sendy or SES. If you don't have the stack set up yet, configure Sendy + SES first.
 
 ---
 
@@ -221,16 +224,7 @@ Failed sends never silently disappear:
 1. **Plugins → Add New** → search for *Quillrush Newsletter Studio for Sendy*
 2. **Install Now → Activate**
 
-### From source
-
-```bash
-cd wp-content/plugins
-git clone https://github.com/gunjanjaswal/quillrush-newsletter-studio-for-sendy.git
-```
-
-Then **Plugins → Activate**.
-
-### Final setup (both paths)
+### Final setup
 
 1. Open **Quillrush Newsletter** in the admin sidebar.
 2. Fill in **Sendy Installation URL**, **API Key**, and (recommended) **Brand ID**.
@@ -435,8 +429,7 @@ If this plugin saves you time or money, back the development on Ko-fi:
 [![Support on Ko-fi](https://img.shields.io/badge/Ko--fi-Support%20on%20Ko--fi-FF5E5B?style=for-the-badge&logo=ko-fi&logoColor=white)](https://ko-fi.com/gunjanjaswal)
 
 Other ways to help:
-- ⭐ Star this repo
-- 🐛 [Report a bug](https://github.com/gunjanjaswal/quillrush-newsletter-studio-for-sendy/issues)
+- ⭐ Leave a review on the WordPress.org plugin page
 - 💬 [Plugin Support Forum](https://wordpress.org/support/plugin/quillrush-newsletter-studio-for-sendy/)
 - ✉️ [hello@gunjanjaswal.me](mailto:hello@gunjanjaswal.me)
 

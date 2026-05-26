@@ -1,6 +1,6 @@
 === Quillrush Newsletter Studio for Sendy ===
 Contributors: gunjanjaswal
-Tags: sendy, newsletter, email, amazon-ses, marketing
+Tags: sendy, sendy-ses, amazon-ses, newsletter, email-marketing
 Requires at least: 5.8
 Tested up to: 7.0
 Requires PHP: 7.4
@@ -9,11 +9,13 @@ Donate link: https://ko-fi.com/gunjanjaswal
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
-Turn WordPress into a newsletter studio for self-hosted Sendy (Amazon SES). Visual builder, two formats, scheduling, multi-list, auto-fetched lists.
+Newsletter studio for the Sendy + Amazon SES stack. Visual builder, two formats, scheduling, multi-list, auto-fetched lists.
 
 == Description ==
 
-📧 **Quillrush Newsletter Studio for Sendy** turns your WordPress dashboard into a full-blown newsletter creation studio. Drag your latest posts into a beautiful responsive HTML email, pick the Sendy lists/segments to ship to, and send via your self-hosted Sendy installation (which forwards through Amazon SES). No HTML coding. No external SaaS. No paid tier.
+📧 **Quillrush Newsletter Studio for Sendy** turns your WordPress dashboard into a full-blown newsletter creation studio for the **Sendy + Amazon SES** stack. Drag your latest posts into a beautiful responsive HTML email, pick the Sendy lists/segments to ship to, and send via your self-hosted Sendy installation, which forwards every message through Amazon SES. No HTML coding. No external SaaS. No paid tier.
+
+> ⚠️ **Requires a self-hosted Sendy install backed by Amazon SES.** This plugin is the WordPress front-end — it does not replace Sendy or SES. If you don't have Sendy + SES set up yet, see [sendy.co](https://sendy.co/) and [aws.amazon.com/ses](https://aws.amazon.com/ses/).
 
 = ✨ Headline features =
 
