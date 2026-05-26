@@ -4,7 +4,7 @@ Tags: sendy, sendy-ses, amazon-ses, newsletter, email-marketing
 Requires at least: 5.8
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 1.6.0
+Stable tag: 1.6.1
 Donate link: https://ko-fi.com/gunjanjaswal
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -190,6 +190,9 @@ Only to **your own self-hosted Sendy installation** at the URL you set in Settin
 
 == Changelog ==
 
+= 1.6.1 =
+* Fix: removed the plugin's own injected "View details" row-meta link to prevent a duplicate entry, since WordPress auto-injects "View details" for wp.org-hosted plugins. Row meta is now `View details | Plugin Support | Contact Developer`.
+
 = 1.6.0 =
 * **WordPress 7.0 tested** and audited; PHP minimum bumped to 7.4.
 * Added `Requires at least`, `Tested up to`, and `Requires PHP` headers to the main plugin file.
@@ -227,6 +230,9 @@ Only to **your own self-hosted Sendy installation** at the URL you set in Settin
 * Initial release.
 
 == Upgrade Notice ==
+
+= 1.6.1 =
+Fixes duplicate "View details" entry on the Plugins screen.
 
 = 1.6.0 =
 WordPress 7.0 tested; PHP 7.4 minimum. Adds one-time auto-migration from predecessor installs (settings, campaigns, post-meta, list-cache, and pending scheduled sends), Ko-fi support link, Plugin Support + Contact Developer row meta, and a Support card on the Settings screen.

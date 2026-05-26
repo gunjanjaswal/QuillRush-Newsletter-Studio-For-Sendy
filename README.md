@@ -4,7 +4,7 @@
 
 ### Turn WordPress into a newsletter studio — built for Sendy + Amazon SES.
 
-[![Version](https://img.shields.io/badge/version-1.6.0-2563eb?style=for-the-badge)](https://wordpress.org/plugins/quillrush-newsletter-studio-for-sendy/)
+[![Version](https://img.shields.io/badge/version-1.6.1-2563eb?style=for-the-badge)](https://wordpress.org/plugins/quillrush-newsletter-studio-for-sendy/)
 [![WordPress](https://img.shields.io/badge/WordPress-5.8%E2%80%937.0-21759b?style=for-the-badge&logo=wordpress&logoColor=white)](https://wordpress.org)
 [![PHP](https://img.shields.io/badge/PHP-7.4%2B-777bb4?style=for-the-badge&logo=php&logoColor=white)](https://www.php.net)
 [![Sendy](https://img.shields.io/badge/Sendy-Compatible-22c55e?style=for-the-badge)](https://sendy.co)
@@ -387,6 +387,9 @@ Yes. Tested up to WordPress 7.0. PHP 7.4 minimum.
 ---
 
 ## 📝 Changelog
+
+### 1.6.1
+- Fix: removed the plugin's own injected "View details" row-meta link to prevent a duplicate entry, since WordPress auto-injects "View details" for wp.org-hosted plugins. Row meta is now `View details | Plugin Support | Contact Developer`.
 
 ### 1.6.0
 - **WordPress 7.0 tested** and audited; PHP minimum bumped to 7.4.
