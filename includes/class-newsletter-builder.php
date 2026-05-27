@@ -277,18 +277,52 @@ class QRNSS_Newsletter_Builder
             wp_send_json_error('Permission denied');
         }
 
-        if (!isset($_POST['campaign'])) {
+        if (!isset($_POST['campaign']) || !is_array($_POST['campaign'])) {
             wp_send_json_error('No campaign data received');
         }
 
-        // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
-        $campaign_data = wp_unslash($_POST['campaign']);
+        // Unslash the raw POST array, then sanitize every field individually below.
+        // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Per-field sanitization performed below.
+        $raw = wp_unslash($_POST['campaign']);
+        if (!is_array($raw)) {
+            wp_send_json_error('Invalid campaign payload');
+        }
+
+        // Build a fully-sanitized campaign record. Nothing from $raw is used downstream.
+        $campaign = array(
+            'subject'       => isset($raw['subject'])       ? sanitize_text_field((string) $raw['subject'])       : '',
+            'from_name'     => isset($raw['from_name'])     ? sanitize_text_field((string) $raw['from_name'])     : '',
+            'from_email'    => isset($raw['from_email'])    ? sanitize_email((string) $raw['from_email'])         : '',
+            'plain_text'    => isset($raw['plain_text'])    ? sanitize_textarea_field((string) $raw['plain_text']) : '',
+            'list_id'       => isset($raw['list_id'])       ? sanitize_text_field((string) $raw['list_id'])       : '',
+            'send_type'     => isset($raw['send_type'])     ? sanitize_key((string) $raw['send_type'])            : 'draft',
+            'schedule_date' => isset($raw['schedule_date']) ? sanitize_text_field((string) $raw['schedule_date']) : '',
+            // html_text is the rendered newsletter body. Run it through an email-safe
+            // wp_kses allowlist so any unexpected <script>/<iframe>/<form>/etc. is stripped
+            // while preserving the markup an HTML email actually needs (tables, inline styles,
+            // images, anchors, headings, lists, etc.).
+            'html_text'     => isset($raw['html_text'])     ? self::kses_email_html((string) $raw['html_text'])    : '',
+        );
+
+        // Validate required fields.
+        if ('' === $campaign['subject']) {
+            wp_send_json_error(array('message' => 'Subject line is required.'));
+        }
+        if ('' === $campaign['from_email']) {
+            wp_send_json_error(array('message' => 'A valid From Email is required.'));
+        }
+        if ('' === $campaign['html_text']) {
+            wp_send_json_error(array('message' => 'Newsletter content is empty.'));
+        }
+        if (!in_array($campaign['send_type'], array('draft', 'send', 'schedule'), true)) {
+            $campaign['send_type'] = 'draft';
+        }
 
         // Create Campaign Post
         $post_args = array(
             'post_type'    => 'qrnss_campaign',
-            'post_title'   => sanitize_text_field($campaign_data['subject']),
-            'post_content' => $campaign_data['html_text'], // Save full HTML
+            'post_title'   => $campaign['subject'],
+            'post_content' => $campaign['html_text'], // Email-kses-sanitized HTML.
             'post_status'  => 'draft',
         );
 
@@ -299,22 +333,22 @@ class QRNSS_Newsletter_Builder
         }
 
         // Save Meta
-        update_post_meta($post_id, '_qrnss_from_name', sanitize_text_field($campaign_data['from_name']));
-        update_post_meta($post_id, '_qrnss_from_email', sanitize_email($campaign_data['from_email']));
-        update_post_meta($post_id, '_qrnss_plain_text', sanitize_textarea_field($campaign_data['plain_text']));
-        update_post_meta($post_id, '_qrnss_list_id', sanitize_text_field($campaign_data['list_id']));
+        update_post_meta($post_id, '_qrnss_from_name',  $campaign['from_name']);
+        update_post_meta($post_id, '_qrnss_from_email', $campaign['from_email']);
+        update_post_meta($post_id, '_qrnss_plain_text', $campaign['plain_text']);
+        update_post_meta($post_id, '_qrnss_list_id',    $campaign['list_id']);
 
         // Remember which list IDs the user actually selected for this campaign,
         // so they can be pre-checked next time the builder is opened.
-        $selected_ids = array_values(array_filter(array_map('trim', explode(',', (string) $campaign_data['list_id']))));
+        $selected_ids = array_values(array_filter(array_map('trim', explode(',', $campaign['list_id']))));
         if (!empty($selected_ids)) {
             update_option('qrnss_remembered_lists', array_map('sanitize_text_field', $selected_ids));
         }
 
-        $send_type = $campaign_data['send_type'];
+        $send_type = $campaign['send_type'];
 
         if ($send_type === 'schedule') {
-             $schedule_date = sanitize_text_field($campaign_data['schedule_date']);
+             $schedule_date = $campaign['schedule_date'];
              $timestamp = strtotime($schedule_date);
 
              if (!$timestamp || $timestamp <= current_time('timestamp')) {
@@ -323,31 +357,31 @@ class QRNSS_Newsletter_Builder
              }
 
              wp_schedule_single_event($timestamp, 'qrnss_send_scheduled_campaign', array($post_id));
-             
+
              update_post_meta($post_id, '_qrnss_status', 'scheduled');
              update_post_meta($post_id, '_qrnss_scheduled_time', $schedule_date);
              wp_update_post(array('ID' => $post_id, 'post_status' => 'publish'));
-             
+
              wp_send_json_success(array('message' => 'Campaign scheduled successfully for ' . $schedule_date));
 
         } elseif ($send_type === 'send') {
-            
+
             update_post_meta($post_id, '_qrnss_status', 'sending');
 
             $api_args = array(
-                'from_name' => sanitize_text_field($campaign_data['from_name']),
-                'from_email' => sanitize_email($campaign_data['from_email']),
-                'reply_to' => sanitize_email($campaign_data['from_email']),
-                'subject' => sanitize_text_field($campaign_data['subject']),
-                'html_text' => $campaign_data['html_text'], // Full HTML required for email
-                'plain_text' => sanitize_textarea_field($campaign_data['plain_text']),
-                'list_ids' => sanitize_text_field($campaign_data['list_id']),
-                'send_campaign' => 1
+                'from_name'     => $campaign['from_name'],
+                'from_email'    => $campaign['from_email'],
+                'reply_to'      => $campaign['from_email'],
+                'subject'       => $campaign['subject'],
+                'html_text'     => $campaign['html_text'],
+                'plain_text'    => $campaign['plain_text'],
+                'list_ids'      => $campaign['list_id'],
+                'send_campaign' => 1,
             );
-    
+
             $sendy_api = new QRNSS_Sendy_API();
             $result = $sendy_api->create_campaign($api_args);
-    
+
             if (is_wp_error($result)) {
                 wp_delete_post($post_id, true);
                 wp_send_json_error(array('message' => $result->get_error_message()));
@@ -361,16 +395,16 @@ class QRNSS_Newsletter_Builder
         } else {
             // Draft
             update_post_meta($post_id, '_qrnss_status', 'draft');
-            
+
              $api_args = array(
-                'from_name' => sanitize_text_field($campaign_data['from_name']),
-                'from_email' => sanitize_email($campaign_data['from_email']),
-                'reply_to' => sanitize_email($campaign_data['from_email']),
-                'subject' => sanitize_text_field($campaign_data['subject']),
-                'html_text' => $campaign_data['html_text'], // Full HTML required for email
-                'plain_text' => sanitize_textarea_field($campaign_data['plain_text']),
-                'list_ids' => sanitize_text_field($campaign_data['list_id']),
-                'send_campaign' => 0
+                'from_name'     => $campaign['from_name'],
+                'from_email'    => $campaign['from_email'],
+                'reply_to'      => $campaign['from_email'],
+                'subject'       => $campaign['subject'],
+                'html_text'     => $campaign['html_text'],
+                'plain_text'    => $campaign['plain_text'],
+                'list_ids'      => $campaign['list_id'],
+                'send_campaign' => 0,
             );
 
             $sendy_api = new QRNSS_Sendy_API();
@@ -385,5 +419,89 @@ class QRNSS_Newsletter_Builder
         }
     }
 
+    /**
+     * Email-safe wp_kses allowlist.
+     *
+     * Strips <script>, <iframe>, <form>, on* event attributes, javascript: URLs,
+     * etc. — while keeping the markup an HTML newsletter actually needs:
+     * tables, inline styles, images, anchors, headings, lists, and presentational
+     * attributes that classic email clients (Outlook, Apple Mail, Gmail) rely on.
+     *
+     * Applied to every `html_text` value before it is stored to `post_content`
+     * or sent to the Sendy API.
+     *
+     * @param string $html Raw email HTML.
+     * @return string Sanitized email HTML.
+     */
+    public static function kses_email_html($html)
+    {
+        $common      = array('style' => true, 'class' => true, 'id' => true, 'align' => true);
+        $cell_attrs  = array_merge($common, array(
+            'width'    => true,
+            'height'   => true,
+            'valign'   => true,
+            'bgcolor' => true,
+            'colspan' => true,
+            'rowspan' => true,
+        ));
+        $allowed = array(
+            'html'       => array('lang' => true, 'xmlns' => true),
+            'head'       => array(),
+            'meta'       => array('charset' => true, 'http-equiv' => true, 'content' => true, 'name' => true),
+            'title'      => array(),
+            'style'      => array('type' => true),
+            'body'       => array_merge($common, array('bgcolor' => true)),
+            'table'      => array_merge($common, array(
+                'width' => true, 'cellpadding' => true, 'cellspacing' => true,
+                'border' => true, 'bgcolor' => true, 'role' => true,
+            )),
+            'thead'      => $common,
+            'tbody'      => $common,
+            'tfoot'      => $common,
+            'tr'         => array_merge($common, array('bgcolor' => true)),
+            'th'         => $cell_attrs,
+            'td'         => $cell_attrs,
+            'div'        => $common,
+            'span'       => $common,
+            'p'          => $common,
+            'a'          => array_merge($common, array('href' => true, 'target' => true, 'rel' => true, 'title' => true)),
+            'img'        => array_merge($common, array(
+                'src' => true, 'alt' => true, 'width' => true, 'height' => true,
+                'border' => true, 'title' => true, 'srcset' => true, 'sizes' => true,
+            )),
+            'h1'         => $common,
+            'h2'         => $common,
+            'h3'         => $common,
+            'h4'         => $common,
+            'h5'         => $common,
+            'h6'         => $common,
+            'strong'     => array(),
+            'b'          => array(),
+            'em'         => array(),
+            'i'          => array(),
+            'u'          => array(),
+            'small'      => array('style' => true),
+            'br'         => array(),
+            'hr'         => array('style' => true),
+            'ul'         => $common,
+            'ol'         => $common,
+            'li'         => $common,
+            'blockquote' => $common,
+            'center'     => array(),
+            'font'       => array('color' => true, 'face' => true, 'size' => true, 'style' => true),
+            'mark'       => array('style' => true),
+            'sup'        => array(),
+            'sub'        => array(),
+        );
 
+        /**
+         * Filter the wp_kses allowlist used to sanitize newsletter HTML before
+         * storage / transmission to Sendy.
+         *
+         * @param array $allowed Tag => attribute-allowlist map.
+         */
+        $allowed = apply_filters('qrnss_email_kses_allowed_html', $allowed);
+
+        return wp_kses($html, $allowed);
+    }
 }
