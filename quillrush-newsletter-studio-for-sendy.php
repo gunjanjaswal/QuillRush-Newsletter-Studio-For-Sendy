@@ -3,7 +3,7 @@
  * Plugin Name: Quillrush Newsletter Studio for Sendy
  * Plugin URI:  https://wordpress.org/plugins/quillrush-newsletter-studio-for-sendy/
  * Description: Connects WordPress to Sendy (via Amazon SES) to create and send newsletters from your content. Visual builder, scheduling, multi-list, and editorial newsletter formats.
- * Version:     1.6.2
+ * Version:     1.6.3
  * Author:      Gunjan Jaswal
  * Author URI:  https://gunjanjaswal.me
  * License:     GPL-2.0+
@@ -21,7 +21,7 @@ if (!defined('ABSPATH')) {
 }
 
 // Define plugin constants.
-define('QRNSS_VERSION', '1.6.2');
+define('QRNSS_VERSION', '1.6.3');
 define('QRNSS_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('QRNSS_PLUGIN_URL', plugin_dir_url(__FILE__));
 
@@ -485,7 +485,7 @@ class QRNSS_Core
 
         wp_enqueue_media();
         wp_enqueue_style('qrnss-admin-style', QRNSS_PLUGIN_URL . 'admin/css/style.css', array(), QRNSS_VERSION);
-        wp_enqueue_script('qrnss-admin-script', QRNSS_PLUGIN_URL . 'admin/js/script.js', array('jquery', 'jquery-ui-datepicker'), QRNSS_VERSION, true);
+        wp_enqueue_script('qrnss-admin-script', QRNSS_PLUGIN_URL . 'admin/js/script.js', array('jquery'), QRNSS_VERSION, true);
 
         
         $options = get_option('qrnss_settings');

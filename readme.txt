@@ -4,7 +4,7 @@ Tags: sendy, sendy-ses, amazon-ses, newsletter, email-marketing
 Requires at least: 5.8
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.6.2
+Stable tag: 1.6.3
 Donate link: https://ko-fi.com/gunjanjaswal
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -190,6 +190,9 @@ Only to **your own self-hosted Sendy installation** at the URL you set in Settin
 
 == Changelog ==
 
+= 1.6.3 =
+* Dropped the jQuery UI datepicker. The scheduling field has been a normal date and time input for a while now, but the plugin was still loading the datepicker library and carrying the old code that drove it, none of which ever ran. One less script on the newsletter screen.
+
 = 1.6.2 =
 * Security: every `$_POST['campaign']` field is now sanitized individually before use (subject, from_name, from_email, plain_text, list_id, send_type, schedule_date). The `html_text` field is run through a dedicated email-safe `wp_kses` allowlist (tables, inline styles, images, anchors, headings, lists — but no `<script>`, `<iframe>`, `<form>`, or `on*` event attributes) before it is stored to `post_content` or sent to the Sendy API. New filter `qrnss_email_kses_allowed_html` lets third parties extend the allowlist.
 * Required-field validation: subject, from_email, and html_text must be non-empty; send_type must be one of `draft` / `send` / `schedule` or it falls back to `draft`.
@@ -235,6 +238,9 @@ Only to **your own self-hosted Sendy installation** at the URL you set in Settin
 * Initial release.
 
 == Upgrade Notice ==
+
+= 1.6.3 =
+Removes the unused jQuery UI datepicker from the newsletter screen. No change to how scheduling works.
 
 = 1.6.2 =
 Security hardening: per-field POST sanitization + dedicated email-HTML kses allowlist for newsletter content. Remote-loaded social icons replaced with self-contained styled buttons.
