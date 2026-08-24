@@ -2,7 +2,7 @@
 Contributors: gunjanjaswal
 Tags: sendy, sendy-ses, amazon-ses, newsletter, email-marketing
 Requires at least: 5.8
-Tested up to: 7.0
+Tested up to: 7.1
 Requires PHP: 7.4
 Stable tag: 1.6.2
 Donate link: https://ko-fi.com/gunjanjaswal
