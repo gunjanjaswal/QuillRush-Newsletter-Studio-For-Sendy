@@ -4,7 +4,7 @@ Tags: sendy, sendy-ses, amazon-ses, newsletter, email-marketing
 Requires at least: 5.8
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.6.3
+Stable tag: 1.6.4
 Donate link: https://ko-fi.com/gunjanjaswal
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -180,6 +180,18 @@ Yes. Tested up to WordPress 7.0. PHP 7.4 minimum.
 
 Only to **your own self-hosted Sendy installation** at the URL you set in Settings. No third-party SaaS. Sendy itself handles the SES handoff from your host.
 
+= I sent to my whole list but only some subscribers received it. =
+
+Sendy locks in the recipient list the moment you hit Send, and it only counts subscribers who are confirmed and haven't bounced or unsubscribed, deduplicated by email. So if an import was still running, or some addresses weren't confirmed yet, they get left out of that campaign for good, even if they show up in the list later. Before a big send, make sure the import has fully finished and the subscribers are marked confirmed in Sendy. To reach people who were added after a campaign went out, send again to just those new subscribers using a separate list or a segment.
+
+= My large campaign stopped before reaching everyone. =
+
+That's almost always the Amazon SES sending limit, not the plugin. SES caps how many emails you can send in any rolling 24-hour window (your Max24HourSend) and how many per second. Send a list bigger than that daily cap and SES refuses the rest until the window clears. Check your quota under SES Console, Account dashboard, and request an increase there if your lists are large. For a list in the hundreds of thousands, raise the daily quota first, then send. Sendy's cron keeps draining the queue as capacity frees up.
+
+= Any advice before sending to a big imported list? =
+
+Ramp up instead of sending everything at once, especially with a freshly imported list you've never mailed. Amazon SES watches your bounce and complaint rates and will pause your account if bounces cross roughly 5% or complaints cross 0.1%. Send a smaller batch first, check the SES reputation dashboard, then release the rest over a day or two. Clear out obviously dead addresses beforehand.
+
 == Screenshots ==
 
 1. Newsletter Builder — search for posts, drag them into the layout, watch the live preview.
@@ -189,6 +201,9 @@ Only to **your own self-hosted Sendy installation** at the URL you set in Settin
 5. Responsive email preview — 2-column desktop → single-column mobile.
 
 == Changelog ==
+
+= 1.6.4 =
+* Documentation: added FAQ guidance for people sending to large lists. Why a campaign's recipient count can come out lower than the list size (Sendy counts confirmed, de-duplicated, non-bounced subscribers and locks the count in the moment you send), why a big send can stop partway through (the Amazon SES daily sending quota), and how to warm up a freshly imported list without tripping SES bounce or complaint limits. No code changes.
 
 = 1.6.3 =
 * Dropped the jQuery UI datepicker. The scheduling field has been a normal date and time input for a while now, but the plugin was still loading the datepicker library and carrying the old code that drove it, none of which ever ran. One less script on the newsletter screen.
@@ -238,6 +253,9 @@ Only to **your own self-hosted Sendy installation** at the URL you set in Settin
 * Initial release.
 
 == Upgrade Notice ==
+
+= 1.6.4 =
+Documentation-only update: new FAQ guidance on Amazon SES sending limits, why recipient counts can look low, and warming up large imported lists. No functional changes.
 
 = 1.6.3 =
 Removes the unused jQuery UI datepicker from the newsletter screen. No change to how scheduling works.

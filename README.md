@@ -4,7 +4,7 @@
 
 ### Turn WordPress into a newsletter studio — built for Sendy + Amazon SES.
 
-[![Version](https://img.shields.io/badge/version-1.6.2-2563eb?style=for-the-badge)](https://wordpress.org/plugins/quillrush-newsletter-studio-for-sendy/)
+[![Version](https://img.shields.io/badge/version-1.6.4-2563eb?style=for-the-badge)](https://wordpress.org/plugins/quillrush-newsletter-studio-for-sendy/)
 [![WordPress](https://img.shields.io/badge/WordPress-5.8%E2%80%937.0-21759b?style=for-the-badge&logo=wordpress&logoColor=white)](https://wordpress.org)
 [![PHP](https://img.shields.io/badge/PHP-7.4%2B-777bb4?style=for-the-badge&logo=php&logoColor=white)](https://www.php.net)
 [![Sendy](https://img.shields.io/badge/Sendy-Compatible-22c55e?style=for-the-badge)](https://sendy.co)
@@ -373,6 +373,24 @@ Yes — every line of "The Insider Brief" (greeting, intro, hero label, grid hea
 Yes. Tested up to WordPress 7.0. PHP 7.4 minimum.
 </details>
 
+<details>
+<summary><b>I sent to my whole list but only some subscribers received it?</b></summary>
+
+Sendy locks in the recipient list the moment you hit Send, and it only counts subscribers who are confirmed and haven't bounced or unsubscribed, deduplicated by email. If an import was still running, or some addresses weren't confirmed yet, they get left out of that campaign for good, even if they appear in the list later. Before a big send, make sure the import has fully finished and the subscribers are confirmed in Sendy. To reach people added after a campaign went out, send again to just those new subscribers using a separate list or a segment.
+</details>
+
+<details>
+<summary><b>My large campaign stopped before reaching everyone?</b></summary>
+
+That's almost always the Amazon SES sending limit, not the plugin. SES caps how many emails you can send in any rolling 24-hour window (your `Max24HourSend`) and how many per second. Send a list bigger than that daily cap and SES refuses the rest until the window clears. Check your quota under **SES Console, Account dashboard** and request an increase if your lists are large. For a list in the hundreds of thousands, raise the daily quota first, then send. Sendy's cron keeps draining the queue as capacity frees up.
+</details>
+
+<details>
+<summary><b>Any advice before sending to a big imported list?</b></summary>
+
+Ramp up instead of sending everything at once, especially with a freshly imported list you've never mailed. Amazon SES watches your bounce and complaint rates and will pause your account if bounces cross roughly 5% or complaints cross 0.1%. Send a smaller batch first, check the SES reputation dashboard, then release the rest over a day or two. Clear out obviously dead addresses beforehand.
+</details>
+
 ---
 
 ## 🔒 Requirements
@@ -387,6 +405,12 @@ Yes. Tested up to WordPress 7.0. PHP 7.4 minimum.
 ---
 
 ## 📝 Changelog
+
+### 1.6.4
+- **Docs:** new FAQ entries for large-list senders. Why a campaign's recipient count can come out lower than the list size (Sendy counts confirmed, de-duplicated, non-bounced subscribers and freezes the count at send time), why a big campaign can stop partway through (the Amazon SES daily sending quota), and how to warm up a freshly imported list without tripping SES bounce/complaint limits. No code changes.
+
+### 1.6.3
+- Dropped the jQuery UI datepicker. The scheduling field had been a normal date/time input for a while, but the plugin was still loading the datepicker library and the old code that drove it, none of which ran. One less script on the newsletter screen.
 
 ### 1.6.2
 - **Security:** every `$_POST['campaign']` field is now sanitized individually before use (subject, from_name, from_email, plain_text, list_id, send_type, schedule_date). The `html_text` field is run through a dedicated email-safe `wp_kses` allowlist (tables, inline styles, images, anchors, headings, lists — but no `<script>`, `<iframe>`, `<form>`, or `on*` event attributes) before it is stored to `post_content` or sent to the Sendy API. New filter `qrnss_email_kses_allowed_html` lets third parties extend the allowlist.
