@@ -4,7 +4,7 @@ Tags: sendy, sendy-ses, amazon-ses, newsletter, email-marketing
 Requires at least: 5.8
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.6.4
+Stable tag: 1.6.5
 Donate link: https://ko-fi.com/gunjanjaswal
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -202,6 +202,11 @@ Ramp up instead of sending everything at once, especially with a freshly importe
 
 == Changelog ==
 
+= 1.6.5 =
+* Fixed: a failed "Send" no longer silently vanishes. If Sendy rejects the send, the campaign is kept and listed under Campaigns as "Failed" with the exact error and a one-click Retry Send button, instead of being deleted with only a fleeting notice. Before this, a failed send left no record anywhere, so there was nothing to see or retry.
+* More tolerant reading of Sendy's response, so a successful send isn't misreported as an error over a trailing newline or a small wording change between Sendy versions.
+* Clearer message when the security token has expired because the newsletter screen was left open too long: it now tells you to reload and try again, instead of showing "Connection error".
+
 = 1.6.4 =
 * Documentation: added FAQ guidance for people sending to large lists. Why a campaign's recipient count can come out lower than the list size (Sendy counts confirmed, de-duplicated, non-bounced subscribers and locks the count in the moment you send), why a big send can stop partway through (the Amazon SES daily sending quota), and how to warm up a freshly imported list without tripping SES bounce or complaint limits. No code changes.
 
@@ -253,6 +258,9 @@ Ramp up instead of sending everything at once, especially with a freshly importe
 * Initial release.
 
 == Upgrade Notice ==
+
+= 1.6.5 =
+Failed sends are now kept and retryable from the Campaigns screen instead of disappearing. More tolerant Sendy response handling, and a clearer message when your session token has expired.
 
 = 1.6.4 =
 Documentation-only update: new FAQ guidance on Amazon SES sending limits, why recipient counts can look low, and warming up large imported lists. No functional changes.

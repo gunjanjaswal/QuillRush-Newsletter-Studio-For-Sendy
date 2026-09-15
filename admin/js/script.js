@@ -242,9 +242,16 @@ jQuery(document).ready(function ($) {
                     alert('Error: ' + response.data.message);
                 }
             },
-            error: function () {
+            error: function (jqXHR) {
                 $btn.prop('disabled', false).text('Create Campaign');
-                alert('Connection error');
+                // A stale security nonce (page left open too long) makes WordPress
+                // reject the request with 403 / "-1" before it ever reaches Sendy.
+                // Tell the user to reload rather than showing a vague error.
+                if (jqXHR && (jqXHR.status === 403 || $.trim(jqXHR.responseText) === '-1')) {
+                    alert('Your session expired. Please reload this page and send again.');
+                } else {
+                    alert('Connection error. Please try again.');
+                }
             }
         });
     });

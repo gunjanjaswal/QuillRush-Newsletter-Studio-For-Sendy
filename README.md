@@ -4,7 +4,7 @@
 
 ### Turn WordPress into a newsletter studio — built for Sendy + Amazon SES.
 
-[![Version](https://img.shields.io/badge/version-1.6.4-2563eb?style=for-the-badge)](https://wordpress.org/plugins/quillrush-newsletter-studio-for-sendy/)
+[![Version](https://img.shields.io/badge/version-1.6.5-2563eb?style=for-the-badge)](https://wordpress.org/plugins/quillrush-newsletter-studio-for-sendy/)
 [![WordPress](https://img.shields.io/badge/WordPress-5.8%E2%80%937.0-21759b?style=for-the-badge&logo=wordpress&logoColor=white)](https://wordpress.org)
 [![PHP](https://img.shields.io/badge/PHP-7.4%2B-777bb4?style=for-the-badge&logo=php&logoColor=white)](https://www.php.net)
 [![Sendy](https://img.shields.io/badge/Sendy-Compatible-22c55e?style=for-the-badge)](https://sendy.co)
@@ -405,6 +405,11 @@ Ramp up instead of sending everything at once, especially with a freshly importe
 ---
 
 ## 📝 Changelog
+
+### 1.6.5
+- **Fixed:** a failed **Send** no longer silently disappears. On a Sendy rejection the campaign is kept and shown under **Campaigns** as *Failed* with the exact error and a one-click **Retry Send**, instead of being hard-deleted with only a fleeting notice. Previously a failed send left no trace anywhere.
+- **Tolerant Sendy response handling.** The success check is now whitespace-trimmed and case-insensitive and also recognises "Campaign scheduled", so a successful send isn't misreported as an error over a trailing newline or a minor wording change.
+- **Clearer expired-session message.** When the security token has gone stale (newsletter screen left open too long), the builder now says to reload and try again instead of showing a generic "Connection error".
 
 ### 1.6.4
 - **Docs:** new FAQ entries for large-list senders. Why a campaign's recipient count can come out lower than the list size (Sendy counts confirmed, de-duplicated, non-bounced subscribers and freezes the count at send time), why a big campaign can stop partway through (the Amazon SES daily sending quota), and how to warm up a freshly imported list without tripping SES bounce/complaint limits. No code changes.

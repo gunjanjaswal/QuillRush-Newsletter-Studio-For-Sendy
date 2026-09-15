@@ -383,7 +383,14 @@ class QRNSS_Newsletter_Builder
             $result = $sendy_api->create_campaign($api_args);
 
             if (is_wp_error($result)) {
-                wp_delete_post($post_id, true);
+                // Keep the campaign on failure instead of deleting it. It now shows up
+                // under Quillrush Newsletter -> Campaigns as "Failed" with the exact
+                // Sendy error and a one-click Retry Send button (send_scheduled_campaign
+                // re-reads this same post meta on retry). A silent delete used to leave a
+                // failed send with no trace anywhere.
+                update_post_meta($post_id, '_qrnss_status', 'failed');
+                update_post_meta($post_id, '_qrnss_send_error', $result->get_error_message());
+                wp_update_post(array('ID' => $post_id, 'post_status' => 'publish'));
                 wp_send_json_error(array('message' => $result->get_error_message()));
             } else {
                 update_post_meta($post_id, '_qrnss_status', 'sent');

@@ -72,10 +72,15 @@ class QRNSS_Sendy_API
             return $response;
         }
 
-        $response_body = wp_remote_retrieve_body($response);
+        $response_body = trim(wp_remote_retrieve_body($response));
 
-        if ('Campaign created' === $response_body || 'Campaign created and now sending' === $response_body) {
-            
+        // Sendy signals success with a short confirmation line -- "Campaign created",
+        // "Campaign created and now sending", or "Campaign scheduled" depending on the
+        // send mode. Match those loosely (case-insensitive, whitespace-trimmed) so a
+        // successful send isn't misread as an error over a trailing newline or a small
+        // wording change between Sendy versions. Anything else is a real error message.
+        if (false !== stripos($response_body, 'Campaign created') || false !== stripos($response_body, 'Campaign scheduled')) {
+
             // Auto-trigger Cron if enabled
             if ($this->trigger_cron) {
                 $this->trigger_sendy_cron();
