@@ -4,7 +4,7 @@ Tags: sendy, sendy-ses, amazon-ses, newsletter, email-marketing
 Requires at least: 5.8
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.6.5
+Stable tag: 1.6.6
 Donate link: https://ko-fi.com/gunjanjaswal
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -202,6 +202,9 @@ Ramp up instead of sending everything at once, especially with a freshly importe
 
 == Changelog ==
 
+= 1.6.6 =
+* Added a large-send confirmation. When the lists you've selected add up to a big audience (20,000 or more by default), the newsletter screen now asks you to confirm before a real send, with a reminder to check your Amazon SES daily sending quota and make sure the list is clean. The `qrnss_large_send_threshold` filter changes the number or turns it off (set it to 0). This is a heads-up only; delivery pacing is unchanged, since Sendy and Amazon SES already throttle the actual sending.
+
 = 1.6.5 =
 * Fixed: a failed "Send" no longer silently vanishes. If Sendy rejects the send, the campaign is kept and listed under Campaigns as "Failed" with the exact error and a one-click Retry Send button, instead of being deleted with only a fleeting notice. Before this, a failed send left no record anywhere, so there was nothing to see or retry.
 * More tolerant reading of Sendy's response, so a successful send isn't misreported as an error over a trailing newline or a small wording change between Sendy versions.
@@ -258,6 +261,9 @@ Ramp up instead of sending everything at once, especially with a freshly importe
 * Initial release.
 
 == Upgrade Notice ==
+
+= 1.6.6 =
+Adds a confirmation prompt before large sends (20,000+ recipients by default), reminding you to check your SES daily quota and list quality. Adjustable via the qrnss_large_send_threshold filter.
 
 = 1.6.5 =
 Failed sends are now kept and retryable from the Campaigns screen instead of disappearing. More tolerant Sendy response handling, and a clearer message when your session token has expired.

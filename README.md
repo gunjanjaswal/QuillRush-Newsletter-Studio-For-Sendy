@@ -4,7 +4,7 @@
 
 ### Turn WordPress into a newsletter studio — built for Sendy + Amazon SES.
 
-[![Version](https://img.shields.io/badge/version-1.6.5-2563eb?style=for-the-badge)](https://wordpress.org/plugins/quillrush-newsletter-studio-for-sendy/)
+[![Version](https://img.shields.io/badge/version-1.6.6-2563eb?style=for-the-badge)](https://wordpress.org/plugins/quillrush-newsletter-studio-for-sendy/)
 [![WordPress](https://img.shields.io/badge/WordPress-5.8%E2%80%937.0-21759b?style=for-the-badge&logo=wordpress&logoColor=white)](https://wordpress.org)
 [![PHP](https://img.shields.io/badge/PHP-7.4%2B-777bb4?style=for-the-badge&logo=php&logoColor=white)](https://www.php.net)
 [![Sendy](https://img.shields.io/badge/Sendy-Compatible-22c55e?style=for-the-badge)](https://sendy.co)
@@ -405,6 +405,9 @@ Ramp up instead of sending everything at once, especially with a freshly importe
 ---
 
 ## 📝 Changelog
+
+### 1.6.6
+- **Large-send confirmation.** When the selected lists add up to a big audience (20,000+ by default), the builder asks you to confirm before a real send, with a reminder to check your Amazon SES daily quota and list quality. Adjust the number or disable it via the `qrnss_large_send_threshold` filter (0 turns it off). Heads-up only; delivery pacing is unchanged, since Sendy and SES already throttle sending.
 
 ### 1.6.5
 - **Fixed:** a failed **Send** no longer silently disappears. On a Sendy rejection the campaign is kept and shown under **Campaigns** as *Failed* with the exact error and a one-click **Retry Send**, instead of being hard-deleted with only a fleeting notice. Previously a failed send left no trace anywhere.

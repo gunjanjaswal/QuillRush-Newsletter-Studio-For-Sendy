@@ -223,6 +223,37 @@ jQuery(document).ready(function ($) {
             return;
         }
 
+        // Large-send warning. For real sends (not drafts), if the combined audience of
+        // the selected lists is large, confirm first. Sendy and SES still throttle the
+        // actual delivery -- this is a heads-up about the SES daily quota and cold-list
+        // reputation, not a technical limit.
+        if (campaignData.send_type !== 'draft') {
+            const threshold = parseInt(qrnss_ajax.large_send_threshold, 10) || 0;
+            if (threshold > 0) {
+                const selectedIds = String(campaignData.list_id || '').split(',').map(s => s.trim()).filter(Boolean);
+                let total = 0, haveCounts = false;
+                selectedIds.forEach(function (id) {
+                    const match = knownLists.find(l => String(l.id) === id);
+                    if (match && match.count !== null && match.count !== undefined) {
+                        total += parseInt(match.count, 10) || 0;
+                        haveCounts = true;
+                    }
+                });
+                if (haveCounts && total >= threshold) {
+                    const proceed = window.confirm(
+                        'You are about to send to about ' + formatCount(total) + ' recipients.\n\n' +
+                        'Large sends can hit your Amazon SES daily sending quota, and sending to a cold or ' +
+                        'unverified list can raise your bounce and complaint rates and hurt deliverability.\n\n' +
+                        'Make sure your SES daily quota covers this and your list is clean. Continue?'
+                    );
+                    if (!proceed) {
+                        $btn.prop('disabled', false).text('Create Campaign');
+                        return;
+                    }
+                }
+            }
+        }
+
         $.ajax({
             url: qrnss_ajax.ajax_url,
             type: 'POST',
