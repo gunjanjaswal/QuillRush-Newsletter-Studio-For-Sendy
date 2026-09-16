@@ -4,7 +4,7 @@ Tags: sendy, sendy-ses, amazon-ses, newsletter, email-marketing
 Requires at least: 5.8
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.6.6
+Stable tag: 1.7.0
 Donate link: https://ko-fi.com/gunjanjaswal
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -192,6 +192,10 @@ That's almost always the Amazon SES sending limit, not the plugin. SES caps how 
 
 Ramp up instead of sending everything at once, especially with a freshly imported list you've never mailed. Amazon SES watches your bounce and complaint rates and will pause your account if bounces cross roughly 5% or complaints cross 0.1%. Send a smaller batch first, check the SES reputation dashboard, then release the rest over a day or two. Clear out obviously dead addresses beforehand.
 
+= How do I see my Amazon SES sending limits in the plugin? =
+
+Upload the file at sendy-companion/ses-quota.php (included with the plugin) into your Sendy install's /api/ folder, so it's reachable at https://your-sendy-url/api/ses-quota.php. The Create Newsletter screen then shows a panel with your daily quota, how much you've sent in the last 24 hours, what's left today, and your send rate, pulled live from your Amazon SES account. The file is read-only and protected by your Sendy API key. Without it, the plugin works exactly as before, just without the panel. Note: the daily quota AWS actually enforces can be lower than the amount you were approved for; SES raises it over time as your sending reputation builds.
+
 == Screenshots ==
 
 1. Newsletter Builder — search for posts, drag them into the layout, watch the live preview.
@@ -201,6 +205,10 @@ Ramp up instead of sending everything at once, especially with a freshly importe
 5. Responsive email preview — 2-column desktop → single-column mobile.
 
 == Changelog ==
+
+= 1.7.0 =
+* New: an Amazon SES sending-limits panel on the Create Newsletter screen. See your daily quota, how much you've sent in the last 24 hours, how much is left today, and your send rate, in plain language, without opening the AWS console. The large-send confirmation now uses the real remaining quota, so it warns you when a send won't fit in what's left of your SES 24-hour window.
+* The numbers come live from your own Amazon SES account through a small read-only companion file you drop into your Sendy install's /api/ folder (included in this release under sendy-companion/). It's protected by your Sendy API key. If you don't install it, the panel simply doesn't appear and nothing else changes.
 
 = 1.6.6 =
 * Added a large-send confirmation. When the lists you've selected add up to a big audience (20,000 or more by default), the newsletter screen now asks you to confirm before a real send, with a reminder to check your Amazon SES daily sending quota and make sure the list is clean. The `qrnss_large_send_threshold` filter changes the number or turns it off (set it to 0). This is a heads-up only; delivery pacing is unchanged, since Sendy and Amazon SES already throttle the actual sending.
@@ -261,6 +269,9 @@ Ramp up instead of sending everything at once, especially with a freshly importe
 * Initial release.
 
 == Upgrade Notice ==
+
+= 1.7.0 =
+Adds an Amazon SES limits panel (daily quota, sent, remaining, rate) to the Create Newsletter screen, and makes the large-send warning quota-aware. Optional: upload sendy-companion/ses-quota.php to your Sendy /api/ folder to switch it on.
 
 = 1.6.6 =
 Adds a confirmation prompt before large sends (20,000+ recipients by default), reminding you to check your SES daily quota and list quality. Adjustable via the qrnss_large_send_threshold filter.

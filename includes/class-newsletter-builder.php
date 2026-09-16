@@ -42,6 +42,40 @@ class QRNSS_Newsletter_Builder
                 <?php esc_html_e('Create Newsletter', 'quillrush-newsletter-studio-for-sendy'); ?>
             </h1>
 
+            <?php
+            // Amazon SES sending limits, shown in plain language for anyone who
+            // won't dig through the AWS console. Needs the optional companion
+            // endpoint (sendy-companion/ses-quota.php) installed on the Sendy
+            // host; if it isn't there, this panel simply doesn't appear.
+            $qrnss_ses = class_exists('QRNSS_Sendy_API') ? (new QRNSS_Sendy_API())->get_ses_quota() : null;
+            if (is_array($qrnss_ses)) {
+                $qrnss_remaining = $qrnss_ses['remaining_today'];
+                $qrnss_over      = $qrnss_remaining < 0;
+                $qrnss_low       = !$qrnss_over && $qrnss_ses['max_24_hour'] > 0 && $qrnss_remaining < ($qrnss_ses['max_24_hour'] * 0.1);
+                $qrnss_accent    = $qrnss_over ? '#d63638' : ($qrnss_low ? '#8a6d00' : '#00814a');
+                $qrnss_bg        = $qrnss_over ? '#fcf0f1' : ($qrnss_low ? '#fcf8e8' : '#edfaf1');
+                ?>
+                <div class="qrnss-ses-panel" style="border-left:4px solid <?php echo esc_attr($qrnss_accent); ?>; background:<?php echo esc_attr($qrnss_bg); ?>; padding:10px 14px; margin:12px 0; border-radius:4px; font-size:13px; line-height:1.6;">
+                    <strong style="color:<?php echo esc_attr($qrnss_accent); ?>;"><?php esc_html_e('Amazon SES sending limits', 'quillrush-newsletter-studio-for-sendy'); ?></strong>
+                    &nbsp;&nbsp;
+                    <?php esc_html_e('Daily quota', 'quillrush-newsletter-studio-for-sendy'); ?>
+                    <strong><?php echo esc_html(number_format($qrnss_ses['max_24_hour'])); ?></strong> &middot;
+                    <?php esc_html_e('Sent last 24h', 'quillrush-newsletter-studio-for-sendy'); ?>
+                    <strong><?php echo esc_html(number_format($qrnss_ses['sent_last_24_hours'])); ?></strong> &middot;
+                    <?php if ($qrnss_over) : ?>
+                        <strong style="color:#d63638;"><?php echo esc_html(sprintf(/* translators: %s: number of emails over the quota */ __('Over quota by %s', 'quillrush-newsletter-studio-for-sendy'), number_format(abs($qrnss_remaining)))); ?></strong>
+                    <?php else : ?>
+                        <strong><?php echo esc_html(sprintf(/* translators: %s: number of emails remaining */ __('%s left today', 'quillrush-newsletter-studio-for-sendy'), number_format($qrnss_remaining))); ?></strong>
+                    <?php endif; ?>
+                    &middot;
+                    <?php esc_html_e('Rate', 'quillrush-newsletter-studio-for-sendy'); ?>
+                    <strong><?php echo esc_html(number_format($qrnss_ses['max_send_rate'])); ?></strong>/<?php esc_html_e('sec', 'quillrush-newsletter-studio-for-sendy'); ?>
+                    <span class="description" style="display:block; margin-top:4px;"><?php esc_html_e('Live from your Amazon SES account. This is the limit AWS actually enforces right now; it rises over time as your sending reputation builds.', 'quillrush-newsletter-studio-for-sendy'); ?></span>
+                </div>
+                <?php
+            }
+            ?>
+
             <div class="qrnss-flex">
                 <!-- Left Column: Controls -->
                 <div class="qrnss-col-left">

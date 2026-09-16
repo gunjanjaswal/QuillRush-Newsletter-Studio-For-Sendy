@@ -223,33 +223,44 @@ jQuery(document).ready(function ($) {
             return;
         }
 
-        // Large-send warning. For real sends (not drafts), if the combined audience of
-        // the selected lists is large, confirm first. Sendy and SES still throttle the
-        // actual delivery -- this is a heads-up about the SES daily quota and cold-list
-        // reputation, not a technical limit.
+        // Large-send warning. For real sends (not drafts), confirm first when the
+        // combined audience is large, or when it won't fit in what's left of your
+        // Amazon SES 24-hour quota (when the SES companion endpoint is installed).
+        // Sendy and SES still throttle actual delivery -- this is a heads-up.
         if (campaignData.send_type !== 'draft') {
             const threshold = parseInt(qrnss_ajax.large_send_threshold, 10) || 0;
-            if (threshold > 0) {
-                const selectedIds = String(campaignData.list_id || '').split(',').map(s => s.trim()).filter(Boolean);
-                let total = 0, haveCounts = false;
-                selectedIds.forEach(function (id) {
-                    const match = knownLists.find(l => String(l.id) === id);
-                    if (match && match.count !== null && match.count !== undefined) {
-                        total += parseInt(match.count, 10) || 0;
-                        haveCounts = true;
+            const selectedIds = String(campaignData.list_id || '').split(',').map(s => s.trim()).filter(Boolean);
+            let total = 0, haveCounts = false;
+            selectedIds.forEach(function (id) {
+                const match = knownLists.find(l => String(l.id) === id);
+                if (match && match.count !== null && match.count !== undefined) {
+                    total += parseInt(match.count, 10) || 0;
+                    haveCounts = true;
+                }
+            });
+
+            const quota = qrnss_ajax.ses_quota || null;
+            const remaining = quota ? Math.floor(quota.remaining_today) : null;
+            const overQuota = haveCounts && remaining !== null && total > remaining;
+            const isLarge = haveCounts && threshold > 0 && total >= threshold;
+
+            if (isLarge || overQuota) {
+                let msg = 'You are about to send to about ' + formatCount(total) + ' recipients.\n\n';
+                if (quota) {
+                    msg += 'Amazon SES right now: ' + formatCount(quota.max_24_hour) + '/day limit, '
+                         + formatCount(quota.sent_last_24_hours) + ' sent in the last 24h, '
+                         + (remaining < 0 ? ('over by ' + formatCount(Math.abs(remaining))) : (formatCount(remaining) + ' left')) + '.\n\n';
+                    if (overQuota) {
+                        msg += 'This send is bigger than what is left in your SES 24-hour window, so SES will pause the rest until the window frees up.\n\n';
                     }
-                });
-                if (haveCounts && total >= threshold) {
-                    const proceed = window.confirm(
-                        'You are about to send to about ' + formatCount(total) + ' recipients.\n\n' +
-                        'Large sends can hit your Amazon SES daily sending quota, and sending to a cold or ' +
-                        'unverified list can raise your bounce and complaint rates and hurt deliverability.\n\n' +
-                        'Make sure your SES daily quota covers this and your list is clean. Continue?'
-                    );
-                    if (!proceed) {
-                        $btn.prop('disabled', false).text('Create Campaign');
-                        return;
-                    }
+                } else {
+                    msg += 'Large sends can hit your Amazon SES daily quota, and sending to a cold or unverified list '
+                         + 'can raise bounce and complaint rates and hurt deliverability.\n\n';
+                }
+                msg += 'Continue?';
+                if (!window.confirm(msg)) {
+                    $btn.prop('disabled', false).text('Create Campaign');
+                    return;
                 }
             }
         }

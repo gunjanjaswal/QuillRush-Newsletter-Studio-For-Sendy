@@ -103,6 +103,54 @@ class QRNSS_Sendy_API
      * @param bool $force_refresh Bypass cache if true.
      * @return array Array of ['id' => ..., 'name' => ...]; empty array on failure.
      */
+    /**
+     * Fetch Amazon SES sending limits via the optional companion endpoint
+     * (api/ses-quota.php) installed on the Sendy host. Cached for 5 minutes.
+     * Returns null when the endpoint is absent or the call fails, so callers can
+     * simply skip the SES panel when it isn't available.
+     *
+     * @param bool $force_refresh
+     * @return array|null { max_24_hour, sent_last_24_hours, remaining_today, max_send_rate }
+     */
+    public function get_ses_quota($force_refresh = false)
+    {
+        if (empty($this->installation_url) || empty($this->api_key)) {
+            return null;
+        }
+
+        $cache_key = 'qrnss_ses_quota_' . md5($this->installation_url);
+        if (!$force_refresh) {
+            $cached = get_transient($cache_key);
+            if (is_array($cached)) {
+                return $cached;
+            }
+        }
+
+        $response = wp_remote_post($this->installation_url . 'api/ses-quota.php', array(
+            'body'      => array('api_key' => $this->api_key),
+            'timeout'   => 15,
+            'sslverify' => false,
+        ));
+
+        if (is_wp_error($response) || 200 !== (int) wp_remote_retrieve_response_code($response)) {
+            return null;
+        }
+
+        $data = json_decode(wp_remote_retrieve_body($response), true);
+        if (!is_array($data) || !isset($data['max_24_hour'])) {
+            return null;
+        }
+
+        $quota = array(
+            'max_24_hour'        => (float) $data['max_24_hour'],
+            'sent_last_24_hours' => (float) $data['sent_last_24_hours'],
+            'remaining_today'    => (float) $data['remaining_today'],
+            'max_send_rate'      => (float) $data['max_send_rate'],
+        );
+        set_transient($cache_key, $quota, 5 * MINUTE_IN_SECONDS);
+        return $quota;
+    }
+
     public function get_lists($force_refresh = false)
     {
         if (empty($this->installation_url) || empty($this->api_key) || empty($this->brand_id)) {
