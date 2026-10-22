@@ -3,7 +3,7 @@
  * Plugin Name: Quillrush Newsletter Studio for Sendy
  * Plugin URI:  https://wordpress.org/plugins/quillrush-newsletter-studio-for-sendy/
  * Description: Connects WordPress to Sendy (via Amazon SES) to create and send newsletters from your content. Visual builder, scheduling, multi-list, and editorial newsletter formats.
- * Version:     1.7.0
+ * Version:     1.8.0
  * Author:      Gunjan Jaswal
  * Author URI:  https://gunjanjaswal.me
  * License:     GPL-2.0+
@@ -21,7 +21,7 @@ if (!defined('ABSPATH')) {
 }
 
 // Define plugin constants.
-define('QRNSS_VERSION', '1.7.0');
+define('QRNSS_VERSION', '1.8.0');
 define('QRNSS_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('QRNSS_PLUGIN_URL', plugin_dir_url(__FILE__));
 
@@ -206,6 +206,73 @@ class QRNSS_Core
         add_action('qrnss_send_scheduled_campaign', array($this, 'send_scheduled_campaign'));
         add_action('admin_notices', array($this, 'check_overdue_campaigns'));
         add_action('admin_init', array($this, 'handle_manual_send'));
+        add_action('transition_post_status', array($this, 'auto_draft_on_publish'), 10, 3);
+    }
+
+    /**
+     * When a post is published, create a draft Sendy campaign from it so a
+     * newsletter is ready to review and send. Draft only, never auto-sends.
+     *
+     * @param string  $new_status New post status.
+     * @param string  $old_status Old post status.
+     * @param WP_Post $post       Post object.
+     */
+    public function auto_draft_on_publish($new_status, $old_status, $post)
+    {
+        if ('publish' !== $new_status || 'publish' === $old_status) {
+            return;
+        }
+        if (!($post instanceof WP_Post) || 'post' !== $post->post_type) {
+            return;
+        }
+
+        $options = get_option('qrnss_settings', array());
+        if (empty($options['auto_draft_enabled'])) {
+            return;
+        }
+
+        $list = !empty($options['auto_draft_list'])
+            ? $options['auto_draft_list']
+            : (!empty($options['list_id']) ? $options['list_id'] : '');
+        if (empty($list)) {
+            return;
+        }
+
+        // One draft per post.
+        if (get_post_meta($post->ID, '_qrnss_auto_drafted', true)) {
+            return;
+        }
+
+        if (!class_exists('QRNSS_Sendy_API')) {
+            require_once QRNSS_PLUGIN_DIR . 'includes/class-sendy-api.php';
+        }
+
+        $html  = apply_filters('the_content', $post->post_content);
+        $title = get_the_title($post);
+
+        $api    = new QRNSS_Sendy_API();
+        $result = $api->create_campaign(array(
+            'from_name'     => !empty($options['from_name']) ? $options['from_name'] : get_bloginfo('name'),
+            'from_email'    => !empty($options['from_email']) ? $options['from_email'] : '',
+            'subject'       => $title,
+            'title'         => $title,
+            'html_text'     => $html,
+            'plain_text'    => wp_strip_all_tags($html),
+            'list_ids'      => $list,
+            'send_campaign' => 0,
+        ));
+
+        if (!is_wp_error($result)) {
+            update_post_meta($post->ID, '_qrnss_auto_drafted', 1);
+        }
+
+        /**
+         * Fires after an auto-draft attempt on publish.
+         *
+         * @param array|WP_Error $result  Sendy API result.
+         * @param int            $post_id Published post ID.
+         */
+        do_action('qrnss_auto_draft_result', $result, $post->ID);
     }
 
     /**

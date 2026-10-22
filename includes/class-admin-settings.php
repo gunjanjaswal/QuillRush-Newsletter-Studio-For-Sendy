@@ -120,6 +120,30 @@ class QRNSS_Admin_Settings
             )
         );
 
+        add_settings_field(
+            'auto_draft_enabled',
+            __('Auto-draft on publish', 'quillrush-newsletter-studio-for-sendy'),
+            array($this, 'render_checkbox_field'),
+            'quillrush_newsletter',
+            'qrnss_main_section',
+            array(
+                'field' => 'auto_draft_enabled',
+                'desc' => __('When you publish a post, create a draft Sendy campaign from it automatically. It is only a draft — nothing is sent until you review and send it in Sendy.', 'quillrush-newsletter-studio-for-sendy')
+            )
+        );
+
+        add_settings_field(
+            'auto_draft_list',
+            __('Auto-draft list ID', 'quillrush-newsletter-studio-for-sendy'),
+            array($this, 'render_text_field'),
+            'quillrush_newsletter',
+            'qrnss_main_section',
+            array(
+                'field' => 'auto_draft_list',
+                'desc' => __('The Sendy list ID to use for auto-drafted campaigns. Leave blank to use your default list.', 'quillrush-newsletter-studio-for-sendy')
+            )
+        );
+
         // --- Footer & Social Settings ---
         
         add_settings_section(
@@ -246,7 +270,12 @@ if (isset($input['trigger_cron'])) {
         } else {
             $new_input['show_article_excerpt'] = '';
         }
-        
+
+        $new_input['auto_draft_enabled'] = isset($input['auto_draft_enabled']) ? '1' : '';
+        if (isset($input['auto_draft_list'])) {
+            $new_input['auto_draft_list'] = sanitize_text_field($input['auto_draft_list']);
+        }
+
         return $new_input;
     }
 

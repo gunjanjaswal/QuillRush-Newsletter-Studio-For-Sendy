@@ -4,7 +4,7 @@ Tags: sendy, sendy-ses, amazon-ses, newsletter, email-marketing
 Requires at least: 5.8
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.7.0
+Stable tag: 1.8.0
 Donate link: https://ko-fi.com/gunjanjaswal
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -206,6 +206,9 @@ Upload the file at sendy-companion/ses-quota.php (included with the plugin) into
 
 == Changelog ==
 
+= 1.8.0 =
+* New: auto-draft on publish. Turn it on in Settings and each time you publish a post, Quillrush creates a draft Sendy campaign from it automatically, with the post title as the subject and the post content as the body. It is always a draft — nothing is sent until you review and send it in Sendy — and you can point it at a specific list.
+
 = 1.7.0 =
 * New: an Amazon SES sending-limits panel on the Create Newsletter screen. See your daily quota, how much you've sent in the last 24 hours, how much is left today, and your send rate, in plain language, without opening the AWS console. The large-send confirmation now uses the real remaining quota, so it warns you when a send won't fit in what's left of your SES 24-hour window.
 * The numbers come live from your own Amazon SES account through a small read-only companion file you drop into your Sendy install's /api/ folder (included in this release under sendy-companion/). It's protected by your Sendy API key. If you don't install it, the panel simply doesn't appear and nothing else changes.
@@ -269,6 +272,9 @@ Upload the file at sendy-companion/ses-quota.php (included with the plugin) into
 * Initial release.
 
 == Upgrade Notice ==
+
+= 1.8.0 =
+Adds optional auto-draft on publish: publishing a post creates a draft Sendy campaign for you to review and send. Off by default.
 
 = 1.7.0 =
 Adds an Amazon SES limits panel (daily quota, sent, remaining, rate) to the Create Newsletter screen, and makes the large-send warning quota-aware. Optional: upload sendy-companion/ses-quota.php to your Sendy /api/ folder to switch it on.
