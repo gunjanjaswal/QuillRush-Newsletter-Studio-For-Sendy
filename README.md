@@ -4,8 +4,8 @@
 
 ### Turn WordPress into a newsletter studio — built for Sendy + Amazon SES.
 
-[![Version](https://img.shields.io/badge/version-1.7.0-2563eb?style=for-the-badge)](https://wordpress.org/plugins/quillrush-newsletter-studio-for-sendy/)
-[![WordPress](https://img.shields.io/badge/WordPress-5.8%E2%80%937.0-21759b?style=for-the-badge&logo=wordpress&logoColor=white)](https://wordpress.org)
+[![Version](https://img.shields.io/badge/version-1.8.1-2563eb?style=for-the-badge)](https://wordpress.org/plugins/quillrush-newsletter-studio-for-sendy/)
+[![WordPress](https://img.shields.io/badge/WordPress-5.8%E2%80%937.1.4-21759b?style=for-the-badge&logo=wordpress&logoColor=white)](https://wordpress.org)
 [![PHP](https://img.shields.io/badge/PHP-7.4%2B-777bb4?style=for-the-badge&logo=php&logoColor=white)](https://www.php.net)
 [![Sendy](https://img.shields.io/badge/Sendy-Compatible-22c55e?style=for-the-badge)](https://sendy.co)
 [![Amazon SES](https://img.shields.io/badge/Amazon%20SES-Required-ff9900?style=for-the-badge&logo=amazonaws&logoColor=white)](https://aws.amazon.com/ses/)
@@ -412,65 +412,73 @@ Upload `sendy-companion/ses-quota.php` (included with the plugin) into your Send
 
 ## 📝 Changelog
 
+### 1.8.1
+- Tested and confirmed compatible with WordPress 7.1.4.
+
+### 1.8.0
+- New: auto-draft on publish. Turn it on in Settings and each time you publish a post, Quillrush creates a draft Sendy campaign from it automatically, with the post title as the subject and the post content as the body. It is always a draft — nothing is sent until you review and send it in Sendy — and you can point it at a specific list.
+
 ### 1.7.0
-- **Amazon SES limits panel** on the Create Newsletter screen: daily quota, sent in the last 24h, remaining today, and send rate, in plain language, no AWS console needed. The large-send confirmation now uses the **real remaining quota**, warning you when a send won't fit in your SES 24-hour window.
-- Powered by a small read-only **companion endpoint** (`sendy-companion/ses-quota.php`) you drop into your Sendy `/api/` folder. Protected by your Sendy API key. The panel simply doesn't appear if it isn't installed. (Heads-up: the quota AWS enforces can be lower than what you were approved for; SES ramps it up over time as reputation builds.)
+- New: an Amazon SES sending-limits panel on the Create Newsletter screen. See your daily quota, how much you've sent in the last 24 hours, how much is left today, and your send rate, in plain language, without opening the AWS console. The large-send confirmation now uses the real remaining quota, so it warns you when a send won't fit in what's left of your SES 24-hour window.
+- The numbers come live from your own Amazon SES account through a small read-only companion file you drop into your Sendy install's /api/ folder (included in this release under sendy-companion/). It's protected by your Sendy API key. If you don't install it, the panel simply doesn't appear and nothing else changes.
 
 ### 1.6.6
-- **Large-send confirmation.** When the selected lists add up to a big audience (20,000+ by default), the builder asks you to confirm before a real send, with a reminder to check your Amazon SES daily quota and list quality. Adjust the number or disable it via the `qrnss_large_send_threshold` filter (0 turns it off). Heads-up only; delivery pacing is unchanged, since Sendy and SES already throttle sending.
+- Added a large-send confirmation. When the lists you've selected add up to a big audience (20,000 or more by default), the newsletter screen now asks you to confirm before a real send, with a reminder to check your Amazon SES daily sending quota and make sure the list is clean. The `qrnss_large_send_threshold` filter changes the number or turns it off (set it to 0). This is a heads-up only; delivery pacing is unchanged, since Sendy and Amazon SES already throttle the actual sending.
 
 ### 1.6.5
-- **Fixed:** a failed **Send** no longer silently disappears. On a Sendy rejection the campaign is kept and shown under **Campaigns** as *Failed* with the exact error and a one-click **Retry Send**, instead of being hard-deleted with only a fleeting notice. Previously a failed send left no trace anywhere.
-- **Tolerant Sendy response handling.** The success check is now whitespace-trimmed and case-insensitive and also recognises "Campaign scheduled", so a successful send isn't misreported as an error over a trailing newline or a minor wording change.
-- **Clearer expired-session message.** When the security token has gone stale (newsletter screen left open too long), the builder now says to reload and try again instead of showing a generic "Connection error".
+- Fixed: a failed "Send" no longer silently vanishes. If Sendy rejects the send, the campaign is kept and listed under Campaigns as "Failed" with the exact error and a one-click Retry Send button, instead of being deleted with only a fleeting notice. Before this, a failed send left no record anywhere, so there was nothing to see or retry.
+- More tolerant reading of Sendy's response, so a successful send isn't misreported as an error over a trailing newline or a small wording change between Sendy versions.
+- Clearer message when the security token has expired because the newsletter screen was left open too long: it now tells you to reload and try again, instead of showing "Connection error".
 
 ### 1.6.4
-- **Docs:** new FAQ entries for large-list senders. Why a campaign's recipient count can come out lower than the list size (Sendy counts confirmed, de-duplicated, non-bounced subscribers and freezes the count at send time), why a big campaign can stop partway through (the Amazon SES daily sending quota), and how to warm up a freshly imported list without tripping SES bounce/complaint limits. No code changes.
+- Documentation: added FAQ guidance for people sending to large lists. Why a campaign's recipient count can come out lower than the list size (Sendy counts confirmed, de-duplicated, non-bounced subscribers and locks the count in the moment you send), why a big send can stop partway through (the Amazon SES daily sending quota), and how to warm up a freshly imported list without tripping SES bounce or complaint limits. No code changes.
 
 ### 1.6.3
-- Dropped the jQuery UI datepicker. The scheduling field had been a normal date/time input for a while, but the plugin was still loading the datepicker library and the old code that drove it, none of which ran. One less script on the newsletter screen.
+- Dropped the jQuery UI datepicker. The scheduling field has been a normal date and time input for a while now, but the plugin was still loading the datepicker library and carrying the old code that drove it, none of which ever ran. One less script on the newsletter screen.
 
 ### 1.6.2
-- **Security:** every `$_POST['campaign']` field is now sanitized individually before use (subject, from_name, from_email, plain_text, list_id, send_type, schedule_date). The `html_text` field is run through a dedicated email-safe `wp_kses` allowlist (tables, inline styles, images, anchors, headings, lists — but no `<script>`, `<iframe>`, `<form>`, or `on*` event attributes) before it is stored to `post_content` or sent to the Sendy API. New filter `qrnss_email_kses_allowed_html` lets third parties extend the allowlist.
-- **Validation:** subject, from_email, and html_text must be non-empty; send_type must be one of `draft` / `send` / `schedule` or it falls back to `draft`.
-- **Removed remote-loaded social icons.** The footer in the rendered newsletter and the admin preview no longer fetch Instagram/LinkedIn/X/YouTube logos from third-party CDNs — they now use self-contained styled letter-buttons (`IG`, `in`, `X`, `YT`). Plugin has zero remote-image dependencies and newsletters render identically in restricted email clients.
+- Security: every `$_POST['campaign']` field is now sanitized individually before use (subject, from_name, from_email, plain_text, list_id, send_type, schedule_date). The `html_text` field is run through a dedicated email-safe `wp_kses` allowlist (tables, inline styles, images, anchors, headings, lists — but no `<script>`, `<iframe>`, `<form>`, or `on*` event attributes) before it is stored to `post_content` or sent to the Sendy API. New filter `qrnss_email_kses_allowed_html` lets third parties extend the allowlist.
+- Required-field validation: subject, from_email, and html_text must be non-empty; send_type must be one of `draft` / `send` / `schedule` or it falls back to `draft`.
+- Removed remote-loaded social icons. The footer in the rendered newsletter and the admin preview no longer fetch Instagram/LinkedIn/X/YouTube logos from flaticon.com / wikimedia.org / freepik.com — they now use self-contained styled letter-buttons (`IG`, `in`, `X`, `YT`) so the plugin has zero remote-image dependencies and the newsletter renders identically offline / in restricted email clients.
 
 ### 1.6.1
 - Fix: removed the plugin's own injected "View details" row-meta link to prevent a duplicate entry, since WordPress auto-injects "View details" for wp.org-hosted plugins. Row meta is now `View details | Plugin Support | Contact Developer`.
 
 ### 1.6.0
 - **WordPress 7.0 tested** and audited; PHP minimum bumped to 7.4.
-- Added `Requires at least`, `Tested up to`, `Requires PHP` headers to the main plugin file.
-- **Auto-migration on first load** (priority 1) for predecessor installs — sweeps every legacy option, custom-post-type row, post-meta key, and pending scheduled cron event to the current `qrnss_*` namespace. Per-prefix `qrnss_migrated_from_<prefix>` guard flag so each migration path runs at most once per install.
-- New **Support on Ko-fi** action link next to Deactivate on the Plugins screen.
-- New **Plugin Support** + **Contact Developer** row-meta links.
-- New "Support the developer" card on the settings screen with Ko-fi button, Plugin Support Forum, and Contact Developer mailto.
-- Donate link set to Ko-fi.
+- Added `Requires at least`, `Tested up to`, and `Requires PHP` headers to the main plugin file.
+- Added one-time auto-migration on first load (priority 1) for predecessor installs: sweeps every legacy option, custom-post-type row, post-meta key, and pending scheduled cron event to the current `qrnss_*` namespace. Per-prefix guard flag so each migration path runs at most once.
+- Added **Support on Ko-fi** action link next to Deactivate on the Plugins screen.
+- Added **Plugin Support** (wordpress.org/support/plugin/quillrush-newsletter-studio-for-sendy) and **Contact Developer** (mailto:hello@gunjanjaswal.me) row-meta entries.
+- Added "Support the developer" card on the Settings screen with branded Ko-fi button, Plugin Support Forum link, and Contact Developer mailto.
+- Donate link set to Ko-fi (https://ko-fi.com/gunjanjaswal).
 
 ### 1.5.2
-- Fix: Infinite scroll in the "Add Posts" panel now triggers correctly. Scroll handler bound directly to the results container instead of delegated.
+- Fix: Infinite scroll in the "Add Posts" panel now actually triggers. The scroll handler was using event delegation which doesn't work for scroll events; it's now bound directly to the results container.
 
 ### 1.5.1
-- Improvement: "About Us" body in The Insider Brief footer block now centered.
-- Cleanup: Removed Buy Me A Coffee references and Support card from settings, builder, plugin row meta, and readme files.
+- Improvement: "About Us" body in The Insider Brief footer block is now centered (heading was already centered).
+- Cleanup: Removed all "Buy Me A Coffee" links and the Support card from the settings page, newsletter builder, plugin row meta, and readme files.
 
 ### 1.5.0
-- Feature: "Add Posts" panel supports infinite scroll. Older posts load automatically as you scroll (10 per batch).
-- Internal: `qrnss_search_posts` AJAX endpoint accepts a `page` parameter and returns `{ posts, page, has_more }`.
+- Feature: "Add Posts" panel now supports infinite scroll. Older posts load automatically as you scroll the results list (10 at a time).
+- Internal: `qrnss_search_posts` AJAX endpoint now accepts a `page` parameter and returns `{ posts, page, has_more }`.
 
 ### 1.4.x
-- Auto-fetched Sendy lists with active subscriber counts. Cached 10 min.
-- Pre-checks the lists used in the last send.
-- Editorial format ("The Insider Brief") added alongside The Roundup.
+- Feature: Auto-fetched Sendy lists with active subscriber counts. Cached 10 minutes; one-click refresh.
+- Feature: Plugin remembers the lists used in your last send and pre-checks them next time.
+- Feature: Editorial format ("The Insider Brief") added alongside The Roundup. All copy editable from settings.
 
 ### 1.3.x
-- Scheduled sending with timezone-aware datetime picker.
-- Failed-campaign retry. Auto-recovery for overdue campaigns.
+- Feature: Scheduled sending with timezone-aware datetime picker.
+- Feature: Failed-campaign retry and auto-recovery for overdue campaigns.
+- Fix: Schedule datetime picker with proper z-index for calendar visibility.
+- Fix: Reply-to email correctly passed for all campaign types.
+- Fix: Resolved "cURL error 28: SSL connection timeout".
+- Security: All inputs properly sanitized and validated.
 
 ### 1.0.0
 - Initial release.
-
----
 
 ## 💖 Support
 
