@@ -2,9 +2,9 @@
 Contributors: gunjanjaswal
 Tags: sendy, sendy-ses, amazon-ses, newsletter, email-marketing
 Requires at least: 5.8
-Tested up to: 7.1
+Tested up to: 7.1.4
 Requires PHP: 7.4
-Stable tag: 1.8.0
+Stable tag: 1.8.1
 Donate link: https://ko-fi.com/gunjanjaswal
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -205,6 +205,9 @@ Upload the file at sendy-companion/ses-quota.php (included with the plugin) into
 5. Responsive email preview — 2-column desktop → single-column mobile.
 
 == Changelog ==
+
+= 1.8.1 =
+* Tested and confirmed compatible with WordPress 7.1.4.
 
 = 1.8.0 =
 * New: auto-draft on publish. Turn it on in Settings and each time you publish a post, Quillrush creates a draft Sendy campaign from it automatically, with the post title as the subject and the post content as the body. It is always a draft — nothing is sent until you review and send it in Sendy — and you can point it at a specific list.
