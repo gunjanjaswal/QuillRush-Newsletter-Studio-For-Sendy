@@ -412,6 +412,8 @@ Upload `sendy-companion/ses-quota.php` (included with the plugin) into your Send
 
 ## 📝 Changelog
 
+The full changelog lives in [`readme.txt`](readme.txt). Recent releases:
+
 ### 1.8.1
 - Tested and confirmed compatible with WordPress 7.1.4.
 
@@ -429,56 +431,6 @@ Upload `sendy-companion/ses-quota.php` (included with the plugin) into your Send
 - Fixed: a failed "Send" no longer silently vanishes. If Sendy rejects the send, the campaign is kept and listed under Campaigns as "Failed" with the exact error and a one-click Retry Send button, instead of being deleted with only a fleeting notice. Before this, a failed send left no record anywhere, so there was nothing to see or retry.
 - More tolerant reading of Sendy's response, so a successful send isn't misreported as an error over a trailing newline or a small wording change between Sendy versions.
 - Clearer message when the security token has expired because the newsletter screen was left open too long: it now tells you to reload and try again, instead of showing "Connection error".
-
-### 1.6.4
-- Documentation: added FAQ guidance for people sending to large lists. Why a campaign's recipient count can come out lower than the list size (Sendy counts confirmed, de-duplicated, non-bounced subscribers and locks the count in the moment you send), why a big send can stop partway through (the Amazon SES daily sending quota), and how to warm up a freshly imported list without tripping SES bounce or complaint limits. No code changes.
-
-### 1.6.3
-- Dropped the jQuery UI datepicker. The scheduling field has been a normal date and time input for a while now, but the plugin was still loading the datepicker library and carrying the old code that drove it, none of which ever ran. One less script on the newsletter screen.
-
-### 1.6.2
-- Security: every `$_POST['campaign']` field is now sanitized individually before use (subject, from_name, from_email, plain_text, list_id, send_type, schedule_date). The `html_text` field is run through a dedicated email-safe `wp_kses` allowlist (tables, inline styles, images, anchors, headings, lists — but no `<script>`, `<iframe>`, `<form>`, or `on*` event attributes) before it is stored to `post_content` or sent to the Sendy API. New filter `qrnss_email_kses_allowed_html` lets third parties extend the allowlist.
-- Required-field validation: subject, from_email, and html_text must be non-empty; send_type must be one of `draft` / `send` / `schedule` or it falls back to `draft`.
-- Removed remote-loaded social icons. The footer in the rendered newsletter and the admin preview no longer fetch Instagram/LinkedIn/X/YouTube logos from flaticon.com / wikimedia.org / freepik.com — they now use self-contained styled letter-buttons (`IG`, `in`, `X`, `YT`) so the plugin has zero remote-image dependencies and the newsletter renders identically offline / in restricted email clients.
-
-### 1.6.1
-- Fix: removed the plugin's own injected "View details" row-meta link to prevent a duplicate entry, since WordPress auto-injects "View details" for wp.org-hosted plugins. Row meta is now `View details | Plugin Support | Contact Developer`.
-
-### 1.6.0
-- **WordPress 7.0 tested** and audited; PHP minimum bumped to 7.4.
-- Added `Requires at least`, `Tested up to`, and `Requires PHP` headers to the main plugin file.
-- Added one-time auto-migration on first load (priority 1) for predecessor installs: sweeps every legacy option, custom-post-type row, post-meta key, and pending scheduled cron event to the current `qrnss_*` namespace. Per-prefix guard flag so each migration path runs at most once.
-- Added **Support on Ko-fi** action link next to Deactivate on the Plugins screen.
-- Added **Plugin Support** (wordpress.org/support/plugin/quillrush-newsletter-studio-for-sendy) and **Contact Developer** (mailto:hello@gunjanjaswal.me) row-meta entries.
-- Added "Support the developer" card on the Settings screen with branded Ko-fi button, Plugin Support Forum link, and Contact Developer mailto.
-- Donate link set to Ko-fi (https://ko-fi.com/gunjanjaswal).
-
-### 1.5.2
-- Fix: Infinite scroll in the "Add Posts" panel now actually triggers. The scroll handler was using event delegation which doesn't work for scroll events; it's now bound directly to the results container.
-
-### 1.5.1
-- Improvement: "About Us" body in The Insider Brief footer block is now centered (heading was already centered).
-- Cleanup: Removed all "Buy Me A Coffee" links and the Support card from the settings page, newsletter builder, plugin row meta, and readme files.
-
-### 1.5.0
-- Feature: "Add Posts" panel now supports infinite scroll. Older posts load automatically as you scroll the results list (10 at a time).
-- Internal: `qrnss_search_posts` AJAX endpoint now accepts a `page` parameter and returns `{ posts, page, has_more }`.
-
-### 1.4.x
-- Feature: Auto-fetched Sendy lists with active subscriber counts. Cached 10 minutes; one-click refresh.
-- Feature: Plugin remembers the lists used in your last send and pre-checks them next time.
-- Feature: Editorial format ("The Insider Brief") added alongside The Roundup. All copy editable from settings.
-
-### 1.3.x
-- Feature: Scheduled sending with timezone-aware datetime picker.
-- Feature: Failed-campaign retry and auto-recovery for overdue campaigns.
-- Fix: Schedule datetime picker with proper z-index for calendar visibility.
-- Fix: Reply-to email correctly passed for all campaign types.
-- Fix: Resolved "cURL error 28: SSL connection timeout".
-- Security: All inputs properly sanitized and validated.
-
-### 1.0.0
-- Initial release.
 
 ## 💖 Support
 
