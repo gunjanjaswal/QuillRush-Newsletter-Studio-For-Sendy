@@ -4,7 +4,7 @@
 
 ### Turn WordPress into a newsletter studio — built for Sendy + Amazon SES.
 
-[![Version](https://img.shields.io/badge/version-1.8.2-2563eb?style=for-the-badge)](https://wordpress.org/plugins/quillrush-newsletter-studio-for-sendy/)
+[![Version](https://img.shields.io/badge/version-1.8.3-2563eb?style=for-the-badge)](https://wordpress.org/plugins/quillrush-newsletter-studio-for-sendy/)
 [![WordPress](https://img.shields.io/badge/WordPress-5.8%E2%80%937.1.4-21759b?style=for-the-badge&logo=wordpress&logoColor=white)](https://wordpress.org)
 [![PHP](https://img.shields.io/badge/PHP-7.4%2B-777bb4?style=for-the-badge&logo=php&logoColor=white)](https://www.php.net)
 [![Sendy](https://img.shields.io/badge/Sendy-Compatible-22c55e?style=for-the-badge)](https://sendy.co)
@@ -413,6 +413,10 @@ Upload `sendy-companion/ses-quota.php` (included with the plugin) into your Send
 ## 📝 Changelog
 
 The full changelog lives in [`readme.txt`](readme.txt). Recent releases:
+
+### 1.8.3
+- Change: failed campaigns no longer show as a stack of notices at the top of the Campaigns screen that came back after closing them. The failure now shows only in the campaign's row, with a Retry Send button in the Error column.
+- New: once a campaign has been sent, earlier failed attempts with the same title are moved to the trash automatically when you open Campaigns. This also clears out old failed attempts that were sent later. Failures that were never sent stay in the list so you can retry them.
 
 ### 1.8.2
 - Fix: the article grid now stacks into one column on phones in every mail app. Before, Gmail on Android (and other apps that strip email styles) showed two squeezed, cut-off columns. Desktop and Outlook still get two columns.

@@ -4,7 +4,7 @@ Tags: sendy, sendy-ses, amazon-ses, newsletter, email-marketing
 Requires at least: 5.8
 Tested up to: 7.1.5
 Requires PHP: 7.4
-Stable tag: 1.8.2
+Stable tag: 1.8.3
 Donate link: https://ko-fi.com/gunjanjaswal
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -206,6 +206,10 @@ Upload the file at sendy-companion/ses-quota.php (included with the plugin) into
 
 == Changelog ==
 
+= 1.8.3 =
+* Change: failed campaigns no longer show as a stack of notices at the top of the Campaigns screen that came back after closing them. The failure now shows only in the campaign's row, with a Retry Send button in the Error column.
+* New: once a campaign has been sent, earlier failed attempts with the same title are moved to the trash automatically when you open Campaigns. This also clears out old failed attempts that were sent later. Failures that were never sent stay in the list so you can retry them.
+
 = 1.8.2 =
 * Fix: the article grid now stacks into one column on phones in every mail app. Before, Gmail on Android (and other apps that strip email styles) showed two squeezed, cut-off columns. Desktop and Outlook still get two columns.
 
@@ -278,6 +282,9 @@ Upload the file at sendy-companion/ses-quota.php (included with the plugin) into
 * Initial release.
 
 == Upgrade Notice ==
+
+= 1.8.3 =
+Failed campaigns now show only in the Campaigns list with a Retry Send button, and failed attempts that were later sent are trashed automatically.
 
 = 1.8.2 =
 Fixes the article grid showing as two cut-off columns in Gmail on Android. Cards now stack on all phones.

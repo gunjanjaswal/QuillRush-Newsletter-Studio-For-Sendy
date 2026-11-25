@@ -3,7 +3,7 @@
  * Plugin Name: Quillrush Newsletter Studio for Sendy
  * Plugin URI:  https://wordpress.org/plugins/quillrush-newsletter-studio-for-sendy/
  * Description: Connects WordPress to Sendy (via Amazon SES) to create and send newsletters from your content. Visual builder, scheduling, multi-list, and editorial newsletter formats.
- * Version:     1.8.2
+ * Version:     1.8.3
  * Author:      Gunjan Jaswal
  * Author URI:  https://gunjanjaswal.me
  * License:     GPL-2.0+
@@ -21,7 +21,7 @@ if (!defined('ABSPATH')) {
 }
 
 // Define plugin constants.
-define('QRNSS_VERSION', '1.8.2');
+define('QRNSS_VERSION', '1.8.3');
 define('QRNSS_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('QRNSS_PLUGIN_URL', plugin_dir_url(__FILE__));
 
@@ -205,6 +205,7 @@ class QRNSS_Core
         add_action('init', array($this, 'register_post_type'));
         add_action('qrnss_send_scheduled_campaign', array($this, 'send_scheduled_campaign'));
         add_action('admin_notices', array($this, 'check_overdue_campaigns'));
+        add_action('load-edit.php', array($this, 'trash_failed_superseded_by_sent'));
         add_action('admin_init', array($this, 'handle_manual_send'));
         add_action('transition_post_status', array($this, 'auto_draft_on_publish'), 10, 3);
     }
@@ -340,6 +341,15 @@ class QRNSS_Core
                 } else {
                     echo '-';
                 }
+
+                if (get_post_meta($post_id, '_qrnss_status', true) === 'failed' && current_user_can('manage_options')) {
+                    $retry_url = add_query_arg(array(
+                        'action'      => 'qrnss_retry_send',
+                        'campaign_id' => $post_id,
+                        'nonce'       => wp_create_nonce('qrnss_retry_send_' . $post_id),
+                    ), admin_url('admin.php'));
+                    echo '<p style="margin:6px 0 0;"><a href="' . esc_url($retry_url) . '" class="button button-small">' . esc_html__('Retry Send', 'quillrush-newsletter-studio-for-sendy') . '</a></p>';
+                }
                 break;
         }
     }
@@ -380,7 +390,7 @@ class QRNSS_Core
     }
 
     /**
-     * Check for overdue scheduled campaigns and show admin notice
+     * Send overdue scheduled campaigns and show a notice for each one sent
      */
     public function check_overdue_campaigns()
     {
@@ -420,61 +430,56 @@ class QRNSS_Core
                 // Check if it was sent successfully
                 $status = get_post_meta($campaign->ID, '_qrnss_status', true);
                 
+                // Failures are not shown as notices; the campaign row shows the
+                // error and a Retry Send button in the Error column.
                 if ($status === 'sent') {
                     echo '<div class="notice notice-success is-dismissible">';
                     echo '<p><strong>Overdue Campaign Sent:</strong> "' . esc_html($campaign->post_title) . '" was automatically sent.</p>';
                     echo '</div>';
-                } else {
-                    // If it failed, show error with retry button
-                    $error = get_post_meta($campaign->ID, '_qrnss_send_error', true);
-                    $retry_url = add_query_arg(array(
-                        'action' => 'qrnss_retry_send',
-                        'campaign_id' => $campaign->ID,
-                        'nonce' => wp_create_nonce('qrnss_retry_send_' . $campaign->ID)
-                    ), admin_url('admin.php'));
-
-                    echo '<div class="notice notice-warning is-dismissible">';
-                    echo '<p><strong>Campaign Failed to Auto-Send:</strong> "' . esc_html($campaign->post_title) . '"</p>';
-                    if ($error) {
-                        echo '<p><strong>Error:</strong> ' . esc_html($error) . '</p>';
-                    }
-                    echo '<p><a href="' . esc_url($retry_url) . '" class="button button-primary">Retry Send</a></p>';
-                    echo '</div>';
                 }
             }
         }
+    }
 
-        // Check for failed campaigns
-        $failed_args = array(
-            'post_type' => 'qrnss_campaign',
-            'post_status' => 'publish',
-            'meta_query' => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- Necessary for filtering failed campaigns
-                array(
-                    'key' => '_qrnss_status',
-                    'value' => 'failed',
-                ),
-            ),
+    /**
+     * Move failed campaigns to the trash once a campaign with the same title
+     * has been sent after them. Runs before the Campaigns list query so the
+     * list only shows failures that still need attention.
+     */
+    public function trash_failed_superseded_by_sent()
+    {
+        $screen = get_current_screen();
+        if (!$screen || 'qrnss_campaign' !== $screen->post_type || !current_user_can('manage_options')) {
+            return;
+        }
+
+        $failed = get_posts(array(
+            'post_type'      => 'qrnss_campaign',
+            'post_status'    => 'publish',
             'posts_per_page' => -1,
-        );
+            'meta_key'       => '_qrnss_status', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key -- Necessary for filtering failed campaigns
+            'meta_value'     => 'failed', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value -- Necessary for filtering failed campaigns
+        ));
 
-        $failed_campaigns = get_posts($failed_args);
+        $latest_sent = array();
+        foreach ($failed as $campaign) {
+            $title = $campaign->post_title;
+            if (!array_key_exists($title, $latest_sent)) {
+                $sent = get_posts(array(
+                    'post_type'      => 'qrnss_campaign',
+                    'post_status'    => 'publish',
+                    'title'          => $title,
+                    'posts_per_page' => 1,
+                    'orderby'        => 'date',
+                    'order'          => 'DESC',
+                    'meta_key'       => '_qrnss_status', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key -- Necessary for filtering sent campaigns
+                    'meta_value'     => 'sent', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value -- Necessary for filtering sent campaigns
+                ));
+                $latest_sent[$title] = $sent ? strtotime($sent[0]->post_date) : false;
+            }
 
-        if (!empty($failed_campaigns)) {
-            foreach ($failed_campaigns as $campaign) {
-                $error = get_post_meta($campaign->ID, '_qrnss_send_error', true);
-                $retry_url = add_query_arg(array(
-                    'action' => 'qrnss_retry_send',
-                    'campaign_id' => $campaign->ID,
-                    'nonce' => wp_create_nonce('qrnss_retry_send_' . $campaign->ID)
-                ), admin_url('admin.php'));
-
-                echo '<div class="notice notice-error is-dismissible">';
-                echo '<p><strong>Campaign Failed:</strong> "' . esc_html($campaign->post_title) . '"</p>';
-                if ($error) {
-                    echo '<p><strong>Error:</strong> ' . esc_html($error) . '</p>';
-                }
-                echo '<p><a href="' . esc_url($retry_url) . '" class="button button-primary">Retry Send</a></p>';
-                echo '</div>';
+            if ($latest_sent[$title] && $latest_sent[$title] >= strtotime($campaign->post_date)) {
+                wp_trash_post($campaign->ID);
             }
         }
     }
