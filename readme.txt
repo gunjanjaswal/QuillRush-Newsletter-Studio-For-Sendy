@@ -4,7 +4,7 @@ Tags: sendy, sendy-ses, amazon-ses, newsletter, email-marketing
 Requires at least: 5.8
 Tested up to: 7.1.5
 Requires PHP: 7.4
-Stable tag: 1.8.1
+Stable tag: 1.8.2
 Donate link: https://ko-fi.com/gunjanjaswal
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -206,6 +206,9 @@ Upload the file at sendy-companion/ses-quota.php (included with the plugin) into
 
 == Changelog ==
 
+= 1.8.2 =
+* Fix: the article grid now stacks into one column on phones in every mail app. Before, Gmail on Android (and other apps that strip email styles) showed two squeezed, cut-off columns. Desktop and Outlook still get two columns.
+
 = 1.8.1 =
 * Tested and confirmed compatible with WordPress 7.1.4.
 
@@ -275,6 +278,9 @@ Upload the file at sendy-companion/ses-quota.php (included with the plugin) into
 * Initial release.
 
 == Upgrade Notice ==
+
+= 1.8.2 =
+Fixes the article grid showing as two cut-off columns in Gmail on Android. Cards now stack on all phones.
 
 = 1.8.0 =
 Adds optional auto-draft on publish: publishing a post creates a draft Sendy campaign for you to review and send. Off by default.

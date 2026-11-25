@@ -389,13 +389,10 @@ jQuery(document).ready(function ($) {
             
             /* Mobile Responsive */
             @media screen and (max-width: 600px) {
-                .responsive-td {
+                .qrnss-col {
                     display: block !important;
                     width: 100% !important;
-                    box-sizing: border-box !important;
-                    padding-left: 0 !important;
-                    padding-right: 0 !important;
-                    padding-bottom: 20px !important;
+                    max-width: 100% !important;
                 }
                 .qrnss-card-table {
                     height: auto !important;
@@ -445,26 +442,22 @@ jQuery(document).ready(function ($) {
         // 4. Grid Section
         const gridPosts = selectedPosts.slice(1);
         if (gridPosts.length > 0) {
-            html += `<div style="padding: 0 30px;"><table border="0" cellpadding="0" cellspacing="0" width="100%">`;
+            html += `<div style="padding: 0 30px;"><div style="font-size:0; text-align:center;">`;
 
             for (let i = 0; i < gridPosts.length; i += 2) {
-                html += `<tr>`;
+                html += `<!--[if mso]><table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%"><tr><![endif]-->`;
 
                 // Column 1
-                const post1 = gridPosts[i];
-                html += renderGridItem(post1);
+                html += renderGridItem(gridPosts[i]);
 
-                // Column 2
+                // Column 2 (if present)
                 if (i + 1 < gridPosts.length) {
-                    const post2 = gridPosts[i + 1];
-                    html += renderGridItem(post2);
-                } else {
-                    html += `<td width="50%"></td>`;
+                    html += renderGridItem(gridPosts[i + 1]);
                 }
 
-                html += `</tr>`;
+                html += `<!--[if mso]></tr></table><![endif]-->`;
             }
-            html += `</table></div>`;
+            html += `</div></div>`;
         }
 
         // 5. Read More
@@ -592,18 +585,16 @@ jQuery(document).ready(function ($) {
             if (settings.editorial_grid_heading) {
                 html += `<h3 style="margin:24px 0 16px; color:#0f172a; font-size:18px; text-align:center;">${settings.editorial_grid_heading}</h3>`;
             }
-            html += `<table border="0" cellpadding="0" cellspacing="0" width="100%" style="margin-bottom:8px;">`;
+            html += `<div style="font-size:0; text-align:center; margin-bottom:8px;">`;
             for (let i = 0; i < otherPosts.length; i += 2) {
-                html += `<tr>`;
+                html += `<!--[if mso]><table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%"><tr><![endif]-->`;
                 html += renderGridItem(otherPosts[i]);
                 if (i + 1 < otherPosts.length) {
                     html += renderGridItem(otherPosts[i + 1]);
-                } else {
-                    html += `<td width="50%"></td>`;
                 }
-                html += `</tr>`;
+                html += `<!--[if mso]></tr></table><![endif]-->`;
             }
-            html += `</table>`;
+            html += `</div>`;
         }
 
         // Why this matters
@@ -640,7 +631,8 @@ jQuery(document).ready(function ($) {
     function renderGridItem(post) {
         const settings = qrnss_ajax.settings || {};
         return `
-        <td class="responsive-td" style="padding:8px; vertical-align: top;" valign="top" width="50%">
+        <!--[if mso]><td valign="top" width="50%" style="padding:8px;"><![endif]-->
+        <div class="qrnss-col" style="display:inline-block; width:100%; max-width:280px; vertical-align:top; box-sizing:border-box; padding:8px; font-size:14px;">
             <table class="qrnss-card-table" cellpadding="0" cellspacing="0" style="border:1px solid #e2e8f0; border-radius:12px; width: 100%; table-layout: fixed; background-color: #ffffff;">
                 <tbody>
                     <tr>
@@ -669,7 +661,8 @@ jQuery(document).ready(function ($) {
                     </tr>
                 </tbody>
             </table>
-        </td>`;
+        </div>
+        <!--[if mso]></td><![endif]-->`;
     }
 
 
