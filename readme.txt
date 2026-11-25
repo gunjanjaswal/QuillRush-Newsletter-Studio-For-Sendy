@@ -4,7 +4,7 @@ Tags: sendy, sendy-ses, amazon-ses, newsletter, email-marketing
 Requires at least: 5.8
 Tested up to: 7.1.5
 Requires PHP: 7.4
-Stable tag: 1.8.3
+Stable tag: 1.8.4
 Donate link: https://ko-fi.com/gunjanjaswal
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -206,6 +206,10 @@ Upload the file at sendy-companion/ses-quota.php (included with the plugin) into
 
 == Changelog ==
 
+= 1.8.4 =
+* Fix: Send and Schedule now need at least one ticked list. If no lists loaded from Sendy (for example a wrong API key or Brand ID), the builder tells you to check Settings instead of sending anyway. Before, it quietly used an old saved list ID, and Sendy failed with "One or more list IDs are invalid" or "List or segment ID(s) not passed".
+* Saving a draft still works without a list.
+
 = 1.8.3 =
 * Change: failed campaigns no longer show as a stack of notices at the top of the Campaigns screen that came back after closing them. The failure now shows only in the campaign's row, with a Retry Send button in the Error column.
 * New: once a campaign has been sent, earlier failed attempts with the same title are moved to the trash automatically when you open Campaigns. This also clears out old failed attempts that were sent later. Failures that were never sent stay in the list so you can retry them.
@@ -282,6 +286,9 @@ Upload the file at sendy-companion/ses-quota.php (included with the plugin) into
 * Initial release.
 
 == Upgrade Notice ==
+
+= 1.8.4 =
+Send and Schedule now require a ticked list, so a campaign can no longer fail in Sendy with a missing or invalid list ID.
 
 = 1.8.3 =
 Failed campaigns now show only in the Campaigns list with a Retry Send button, and failed attempts that were later sent are trashed automatically.

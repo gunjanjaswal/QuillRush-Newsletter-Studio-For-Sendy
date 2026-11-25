@@ -35,7 +35,6 @@ class QRNSS_Newsletter_Builder
         $options = get_option('qrnss_settings');
         $default_from_name = isset($options['from_name']) ? $options['from_name'] : '';
         $default_from_email = isset($options['from_email']) ? $options['from_email'] : '';
-        $default_list_id = isset($options['list_id']) ? $options['list_id'] : '';
         ?>
         <div class="wrap qrnss-container">
             <h1>
@@ -137,7 +136,7 @@ class QRNSS_Newsletter_Builder
                             <label>
                                 <?php esc_html_e('Choose your lists & segments', 'quillrush-newsletter-studio-for-sendy'); ?>
                             </label><br>
-                            <input type="hidden" id="qrnss-list-id" value="<?php echo esc_attr($default_list_id); ?>">
+                            <input type="hidden" id="qrnss-list-id">
                             <span id="qrnss-list-empty-notice" class="description" style="display:none;">
                                 <?php
                                 printf(
@@ -350,6 +349,10 @@ class QRNSS_Newsletter_Builder
         }
         if (!in_array($campaign['send_type'], array('draft', 'send', 'schedule'), true)) {
             $campaign['send_type'] = 'draft';
+        }
+        // Sending or scheduling needs a list. Stop here so no failed campaign is saved.
+        if ('draft' !== $campaign['send_type'] && '' === trim(str_replace(',', '', $campaign['list_id']))) {
+            wp_send_json_error(array('message' => 'Choose at least one list to send to.'));
         }
 
         // Create Campaign Post

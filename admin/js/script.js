@@ -191,25 +191,8 @@ jQuery(document).ready(function ($) {
             from_name: $('#qrnss-from-name').val(),
             from_email: $('#qrnss-from-email').val(),
             html_text: $('#qrnss-preview-content').html(),
-            list_id: (function () {
-                const $selectedLists = $('input[name="qrnss_target_lists"]:checked');
-                if ($selectedLists.length > 0) {
-                    const ids = [];
-                    $selectedLists.each(function () { ids.push($(this).val()); });
-                    return ids.join(',');
-                }
-                // Fallback: parse pipe-separated format (List Name|List ID)
-                const rawValue = $('#qrnss-list-id').val();
-                if (rawValue && rawValue.includes('|')) {
-                    const ids = rawValue.split('\n')
-                        .map(line => line.trim())
-                        .filter(line => line.includes('|'))
-                        .map(line => line.split('|')[1].trim())
-                        .filter(id => id.length > 0);
-                    return ids.join(',');
-                }
-                return rawValue;
-            })(),
+            // Only the lists ticked in the builder. There is no hidden fallback list.
+            list_id: $('input[name="qrnss_target_lists"]:checked').map(function () { return $(this).val(); }).get().join(','),
             send_type: $('input[name="qrnss_send_type"]:checked').val(),
             schedule_date: $('#qrnss-schedule-datetime').val()
         };
@@ -219,6 +202,15 @@ jQuery(document).ready(function ($) {
         // Basic validation for schedule
         if (campaignData.send_type === 'schedule' && !campaignData.schedule_date) {
             alert('Please select a date and time for scheduling.');
+            $btn.prop('disabled', false).text('Create Campaign');
+            return;
+        }
+
+        // Sending or scheduling needs at least one ticked list. Drafts can be saved without one.
+        if (campaignData.send_type !== 'draft' && !campaignData.list_id) {
+            alert(knownLists.length === 0
+                ? 'No lists were loaded from Sendy, so there is nothing to send to. Check your Sendy URL, API Key and Brand ID in Settings, then click "Refresh lists from Sendy".'
+                : 'Tick at least one list to send to.');
             $btn.prop('disabled', false).text('Create Campaign');
             return;
         }

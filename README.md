@@ -4,7 +4,7 @@
 
 ### Turn WordPress into a newsletter studio — built for Sendy + Amazon SES.
 
-[![Version](https://img.shields.io/badge/version-1.8.3-2563eb?style=for-the-badge)](https://wordpress.org/plugins/quillrush-newsletter-studio-for-sendy/)
+[![Version](https://img.shields.io/badge/version-1.8.4-2563eb?style=for-the-badge)](https://wordpress.org/plugins/quillrush-newsletter-studio-for-sendy/)
 [![WordPress](https://img.shields.io/badge/WordPress-5.8%E2%80%937.1.4-21759b?style=for-the-badge&logo=wordpress&logoColor=white)](https://wordpress.org)
 [![PHP](https://img.shields.io/badge/PHP-7.4%2B-777bb4?style=for-the-badge&logo=php&logoColor=white)](https://www.php.net)
 [![Sendy](https://img.shields.io/badge/Sendy-Compatible-22c55e?style=for-the-badge)](https://sendy.co)
@@ -413,6 +413,10 @@ Upload `sendy-companion/ses-quota.php` (included with the plugin) into your Send
 ## 📝 Changelog
 
 The full changelog lives in [`readme.txt`](readme.txt). Recent releases:
+
+### 1.8.4
+- Fix: Send and Schedule now need at least one ticked list. If no lists loaded from Sendy (for example a wrong API key or Brand ID), the builder tells you to check Settings instead of sending anyway. Before, it quietly used an old saved list ID, and Sendy failed with "One or more list IDs are invalid" or "List or segment ID(s) not passed".
+- Saving a draft still works without a list.
 
 ### 1.8.3
 - Change: failed campaigns no longer show as a stack of notices at the top of the Campaigns screen that came back after closing them. The failure now shows only in the campaign's row, with a Retry Send button in the Error column.
